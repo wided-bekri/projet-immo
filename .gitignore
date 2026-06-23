@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+mlruns/
+mlartifacts/
+reports/
+monitoring/reports/
+data/processed/
+data/raw/
+artifacts/
+*.log
+# Secrets
+.env
+
+# Modeles ML (gérés par DVC)
+*.pkl
+notebooks/Models/
+models/
+
+# Base de données MLflow
+mlflow.db
+
+# Jupyter
+.ipynb_checkpoints/
