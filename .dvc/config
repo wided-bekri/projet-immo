@@ -1,0 +1,4 @@
+[core]
+    remote = origin
+['remote "origin"']
+    url = https://dagshub.com/wided-bekri/projet-immo.dvc
