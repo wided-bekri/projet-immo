@@ -1,52 +1,43 @@
 services:
-  api:
-    build: .
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-    environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-    depends_on:
-      - mlflow
-
-  streamlit:
-    build: .
-    command: streamlit run app/app.py --server.address 0.0.0.0 --server.port 8501
-    ports:
-      - "8501:8501"
-    volumes:
-      - .:/app
 
   mlflow:
-    build: .
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /app/mlartifacts
+    image: python:3.11-slim
+    container_name: immo-mlflow
+    command: >
+      bash -c "pip install mlflow>=2.14 --quiet &&
+               mlflow server
+               --host 0.0.0.0
+               --port 5000
+               --backend-store-uri sqlite:///mlflow.db
+               --default-artifact-root /mlflow/artifacts"
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
+      - mlflow_data:/mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  prometheus:
-    image: prom/prometheus:v2.54.1
+  api:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.inference
+    container_name: immo-api
     ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - IMMO_API_KEY=${IMMO_API_KEY:-}
     depends_on:
-      - api
-
-  grafana:
-    image: grafana/grafana:11.1.4
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-storage:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    depends_on:
-      - prometheus
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  grafana-storage:
-
+  mlflow_data:

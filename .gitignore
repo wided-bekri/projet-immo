@@ -1,27 +1,58 @@
+## Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
 .venv/
 venv/
+
+## MLflow
 mlruns/
 mlartifacts/
-reports/
-monitoring/reports/
+mlflow.db
+
+## DVC (données volumineuses — gérées par DVC)
 data/processed/
 data/raw/
 artifacts/
-*.log
-# Secrets
+
+## Données brutes (trop lourdes pour Git)
+*.csv
+*.csv.gz
+*.parquet
+
+## Modèles ML (gérés par DVC — sauf les .dvc pointeurs)
+*.pkl
+*.joblib
+
+## Notebooks (travail exploratoire — pas du code MLOps)
+*.ipynb
+.ipynb_checkpoints/
+
+## Secrets
 .env
 
-# Modeles ML (gérés par DVC)
-*.pkl
-notebooks/Models/
+## Logs
+*.log
+
+## Fichiers générés
+reports/
+monitoring/reports/
+docs/
+historique_retrouve/
+generate_doc*.py
+gen_mockups.py
+*.png
+*.odt
+*.docx
+*.txt
+*.bat
+contact.html
+k8s/
 models/
-
-# Base de données MLflow
-mlflow.db
-
-# Jupyter
-.ipynb_checkpoints/
+pyproject.toml
+.claude/
+.dockerignore
+.github/
+installer_et_lancer.bat
+MEMOIRE_COMPAGNON_IMMOBILIER.md
