@@ -97,7 +97,7 @@ def load_model_from_mlflow() -> bool:
         segments = ["bas_appart", "bas_maison", "milieu_appart", "milieu_maison", "haut_appart", "haut_maison"]
         models = {}
         for seg in segments:
-            uri = f"runs:/{run_id}/models/{seg}"
+            uri = f"runs:/{run_id}/model_{seg}"
             try:
                 models[seg] = mlflow.xgboost.load_model(uri)
                 logger.info(f"Modèle chargé depuis MLflow : {seg}")
@@ -307,6 +307,13 @@ def predict(req: PredictionRequest, x_api_key: Optional[str] = Header(default=No
             logger.warning(f"Segment non trouvé, fallback sur : {segment}")
 
         model = state["models"][segment]
+        # Aligner les features sur celles du modèle entraîné
+        if hasattr(model, "feature_names_in_"):
+            model_features = list(model.feature_names_in_)
+            for f in model_features:
+                if f not in X.columns:
+                    X[f] = 0.0
+            X = X[model_features]
         prix_m2 = float(model.predict(X)[0])
         prix_m2 = max(state["meta"]["prix_m2_min"], min(state["meta"]["prix_m2_max"], prix_m2))
 
