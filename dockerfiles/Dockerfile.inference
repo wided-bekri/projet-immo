@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Dépendances Python
 COPY dockerfiles/requirements-inference.txt .
-RUN pip install --no-cache-dir -r requirements-inference.txt
+RUN pip install --no-cache-dir --timeout=300 --retries=5 -r requirements-inference.txt
 
 # Code source
 COPY src/services/inference/inference_service.py src/services/inference/inference_service.py

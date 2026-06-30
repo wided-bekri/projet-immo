@@ -7,6 +7,8 @@ services:
     container_name: immo-mlflow
     ports:
       - "5000:5000"
+    environment:
+      - MLFLOW_SERVER_ALLOWED_HOSTS=*
     volumes:
       - ./mlflow.db:/mlflow.db
       - mlflow_artifacts:/mlflow/artifacts
@@ -22,11 +24,17 @@ services:
       context: .
       dockerfile: dockerfiles/Dockerfile.inference
     container_name: immo-api
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - IMMO_API_KEY=${IMMO_API_KEY:-}
+    volumes:
+      - ./mlruns:/mlruns:ro
+    command: >
+      bash -c "mkdir -p '/C:/Users/wided/projet-immo' &&
+               ln -sfn /mlruns '/C:/Users/wided/projet-immo/mlruns' &&
+               uvicorn src.services.inference.inference_service:app --host 0.0.0.0 --port 8000"
     depends_on:
       mlflow:
         condition: service_healthy
@@ -35,6 +43,19 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  nginx:
+    build:
+      context: deployments/nginx/
+      dockerfile: Dockerfile
+    container_name: immo-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
