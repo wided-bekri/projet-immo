@@ -204,9 +204,9 @@ with kpi1:
 with kpi2:
     st.metric(label="Sources de données", value="7")
 with kpi3:
-    st.metric(label="Modèle Core", value="XGBoost Unifié")
+    st.metric(label="Modèle Core", value="6 XGBoost Segmentés")
 with kpi4:
-    st.metric(label="Architecture", value="7 Microservices")
+    st.metric(label="Architecture", value="10 Microservices")
 
 st.write("---")
 
