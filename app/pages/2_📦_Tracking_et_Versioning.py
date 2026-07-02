@@ -98,7 +98,7 @@ with c_dvc_mecanisme:
     analytics = false
     remote = origin
 ['remote "origin"']
-    url = https://dagshub.com/wided-bekri/compagnon-immo.dvc
+    url = https://dagshub.com/wided-bekri/projet-immo.dvc
     """, language="ini")
     st.markdown("**La commande magique de reproductibilité complète :**")
     st.code("""
@@ -149,7 +149,7 @@ with c_dock_code:
     ports:
       - "5000:5000"
     volumes:
-      - ./mlflow.db:/mlflow.db
+      - mlflow_db:/mlflow
       - mlflow_artifacts:/mlflow/artifacts
         """, language="yaml")
         
