@@ -254,7 +254,7 @@ with col_detail:
             st.plotly_chart(fig_mini, use_container_width=True)
 
         if st.button("Voir l'estimation pour ce département →", use_container_width=True):
-            st.switch_page("pages/1_🏡_Estimation.py")
+            st.switch_page("pages/4_🔍_Estimation.py")
 
 
 

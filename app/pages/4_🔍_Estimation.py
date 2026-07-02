@@ -560,7 +560,7 @@ st.markdown(
     """
     <p class="disclaimer">
     Estimations basées sur DVF 2020-2025 + DPE ADEME. Modèle XGBoost
-    (R²=0.8101, MAPE=29.71%). Pour une valorisation précise, consultez un professionnel.
+    (R²=0.81, MAPE=29.68%). Pour une valorisation précise, consultez un professionnel.
     </p>
     """,
     unsafe_allow_html=True,

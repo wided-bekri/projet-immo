@@ -237,7 +237,7 @@ st.write("---")
 st.markdown(f"""
 <div style="background: linear-gradient(135deg, #162447 0%, #1f4068 100%); padding: 20px; border-radius: 10px; border-left: 6px solid #a55eea;">
     <h4 style="color:#00eaaf !important; margin-top:0; font-weight:700; font-size:1.1rem;">🔄 Transition : Vers l'orchestration des flux et pipelines automatisés</h4>
-    <p style="font-size:0.9rem; margin-bottom:0; opacity:0.95; line-height:1.5;">
+    <p style="font-size:0.9rem; margin-bottom:0; opacity:0.95; line-height:1.5; color:#ffffff;">
         <b>« Messieurs les membres du jury, notre infrastructure logicielle est désormais totalement isolée, gouvernée et versionnée (Code via GitHub, Données via DVC/DagsHub, Modèles via MLflow).</b><br>
         Cependant, un système en production doit savoir vivre et s'actualiser de lui-même sans intervention humaine manuelle.<br>
         Voyons immédiatement dans la <b>Phase 3</b> comment nous exploitons la puissance d'<b>Apache Airflow</b> pour orchestrer nos pipelines de données et planifier nos cycles d'entraînement ! »

@@ -269,7 +269,7 @@ st.markdown("""
     <div style="color:#FFFFFF !important; font-size: 1.3rem; font-weight: 700; margin-top: 0; margin-bottom: 10px;">
         Structure de la soutenance
     </div>
-    <p style="margin-bottom: 0; opacity: 0.9; line-height: 1.6;">
+    <p style="margin-bottom: 0; opacity: 0.9; line-height: 1.6; color: #ffffff;">
         Pour explorer les entrailles techniques de cette plateforme, utilisez le menu latéral. Nous débuterons par notre 
         <b>Laboratoire de Data Science</b> pour analyser les données de base, avant de décortiquer pas à pas l'infrastructure 
         <b>MLOps (Tracking, Orchestration et Production)</b> mise en place pour faire tourner l'application de simulation finale.

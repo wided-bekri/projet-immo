@@ -240,7 +240,7 @@ st.markdown("---")
 # 🟦 5. ARCHITECTURE MULTI-MODÈLES
 # ==================================================
 st.header("4️⃣ Une architecture spécialisée")
-st.markdown("#### 分 Segmentation multi-modèles (6 modèles XGBoost indépendants)")
+st.markdown("#### 🔀 Segmentation multi-modèles (6 modèles XGBoost indépendants)")
 
 # Section visuelle propre sous forme de colonnes de blocs (Remplace l'ASCII tree)
 b1, b2, b3 = st.columns(3)

@@ -9,7 +9,6 @@ RUN pip install --no-cache-dir --timeout=300 --retries=5 -r requirements-streaml
 
 COPY app/ app/
 COPY notebooks/Models/ notebooks/Models/
-COPY liste-des-gares.csv .
 
 EXPOSE 8501
 
