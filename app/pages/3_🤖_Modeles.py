@@ -297,10 +297,10 @@ st.markdown("---")
 st.header("5️⃣ Les résultats finaux")
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric(label="📈 R² Final", value="0.81")
-col2.metric(label="📉 MAE", value="617 €/m²")
-col3.metric(label="📉 RMSE", value="983 €/m²")
-col4.metric(label="🎯 MAPE Final", value="29.68 %")
+col1.metric(label="📈 R² Final", value="0.80")
+col2.metric(label="📉 MAE", value="648 €/m²")
+col3.metric(label="📉 RMSE", value="1 014 €/m²")
+col4.metric(label="🎯 MAPE Final", value="31.45 %")
 
 st.success("📈 Amélioration significative grâce à la segmentation territoriale")
 
@@ -310,9 +310,9 @@ col_blank, col_delta_chart = st.columns([1, 2])
 with col_delta_chart:
     fig_gain = go.Figure(go.Indicator(
         mode = "delta",
-        value = 29.68,
+        value = 31.45,
         delta = {'reference': 34.10, 'relative': False, 'increasing': {'color': "#FF4B4B"}, 'decreasing': {'color': "#17b978"}},
-        title = {"text": "Optimisation de la MAPE (Gain par segmentation)"}
+        title = {"text": "Optimisation de la MAPE (XGBoost optimisé vs Baseline)"}
     ))
     fig_gain.update_layout(height=160, margin=dict(t=40, b=10, l=10, r=10))
     st.plotly_chart(fig_gain, use_container_width=True)

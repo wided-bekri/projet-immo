@@ -38,14 +38,8 @@ def load_communes():
     return df.sort_values("label").reset_index(drop=True)
 
 @st.cache_resource(show_spinner="Chargement du modele...")
-def load_models():
-    meta = pickle.load(open(os.path.join(MODEL_DIR, "meta_6modeles.pkl"), "rb"))
-    models = {}
-    for tranche in ("bas", "milieu", "haut"):
-        for t in ("maison", "appart"):
-            path = os.path.join(MODEL_DIR, f"model_xgb_{tranche}_{t}.pkl")
-            models[f"{tranche}_{t}"] = pickle.load(open(path, "rb"))
-    return meta, models
+def load_model():
+    return pickle.load(open(os.path.join(MODEL_DIR, "model_xgboost_single.pkl"), "rb"))
 
 @st.cache_data(show_spinner=False)
 def load_gares():
@@ -56,11 +50,9 @@ def load_gares():
     except:
         return pd.DataFrame()
 
-communes    = load_communes()
-meta, models = load_models()
-FEATURES    = meta["features"]
-Q33, Q66    = float(meta["q33"]), float(meta["q66"])
-gares_df    = load_gares()
+communes = load_communes()
+model    = load_model()
+gares_df = load_gares()
 
 DPE_NUM = {"A":1,"B":2,"C":3,"D":4,"E":5,"F":6,"G":7,"Non renseigne":4}
 
@@ -71,11 +63,6 @@ def dept_to_int(code):
     if code == "2B": return 202.0
     try: return float(int(code))
     except: return 0.0
-
-def get_tranche(pm2):
-    if pm2 < Q33: return "bas"
-    elif pm2 <= Q66: return "milieu"
-    return "haut"
 
 def fmt_eur(v):  return f"{v:,.0f} €".replace(",", " ")
 def fmt_pm2(v):  return f"{v:,.0f} €/m²".replace(",", " ")
@@ -273,7 +260,49 @@ with p4:
 
 # Estimation si surface fournie
 if surface:
-    prix_est  = pm2_type * surface
+    try:
+        code_dep_int = dept_to_int(row["code_departement"])
+        surface_par_piece = surface / max(nb_pieces, 1)
+        X = pd.DataFrame([{
+            "surface_reelle_bati": surface,
+            "nombre_pieces_principales": nb_pieces,
+            "surface_terrain": 0.0,
+            "annee": 2025,
+            "mois": 6,
+            "code_departement": code_dep_int,
+            "longitude": float(row["longitude"]),
+            "latitude": float(row["latitude"]),
+            "is_maison": is_maison_flag,
+            "is_neuf": 0,
+            "anciennete_mois": 360,
+            "surface_par_piece": surface_par_piece,
+            "revenu_median": float(row.get("revenu_median") or 22000),
+            "taux_pauvrete": float(row.get("taux_pauvrete") or 14),
+            "nb_equipements_total": float(row.get("nb_equipements_total") or 50),
+            "population_2023": float(row.get("population_2023") or 50000),
+            "evolution_pop_5_ans": float(row.get("evolution_pop_5_ans") or 0),
+            "evolution_pop_10_ans": float(row.get("evolution_pop_10_ans") or 0),
+            "taux_cambriolages": float(row.get("taux_cambriolages") or 5),
+            "taux_vols_total": float(row.get("taux_vols_total") or 10),
+            "taux_violences_total": float(row.get("taux_violences_total") or 8),
+            "commune_prix_m2": float(pm2_global),
+            "commune_volume": float(row.get("commune_volume") or 100),
+            "dept_prix_m2": float(pm2_dept if not pd.isna(pm2_dept) else pm2_global),
+            "dept_prix_m2_maison": float(row.get("dept_prix_m2_maison") or pm2_global),
+            "commune_prix_m2_maison": float(pm2_maison if not pd.isna(pm2_maison) and pm2_maison > 0 else pm2_global),
+            "commune_volume_maison": float(row.get("commune_volume_maison") or 50),
+            "dept_prix_m2_appart": float(row.get("dept_prix_m2_appart") or pm2_global),
+            "commune_prix_m2_appart": float(pm2_appart if not pd.isna(pm2_appart) and pm2_appart > 0 else pm2_global),
+            "commune_volume_appart": float(row.get("commune_volume_appart") or 50),
+            "prix_estime_commune": float(pm2_global),
+        }])
+        residuel = float(model.predict(X)[0])
+        prix_m2_ml = max(300.0, min(15000.0, residuel + pm2_global))
+        prix_est = prix_m2_ml * surface
+    except Exception:
+        prix_m2_ml = pm2_type
+        prix_est = pm2_type * surface
+
     prix_bas  = prix_est * 0.85
     prix_haut = prix_est * 1.15
     st.markdown("<br>", unsafe_allow_html=True)
@@ -281,11 +310,11 @@ if surface:
         f"""
         <div style="background:linear-gradient(135deg,#1B3A4B,#2D5A73);
                     border-radius:12px;padding:1.5rem 2rem;color:white">
-            <p style="margin:0;font-size:0.9rem;opacity:0.8">
-                Estimation pour {int(surface)} m² — {type_bien} — {nom}
+            <p style="margin:0;font-size:0.9rem;opacity:0.8;color:white">
+                Estimation XGBoost pour {int(surface)} m² — {type_bien} — {nom}
             </p>
-            <p style="margin:0.3rem 0;font-size:2.5rem;font-weight:800">{fmt_eur(prix_est)}</p>
-            <p style="margin:0;font-size:0.95rem;opacity:0.8">
+            <p style="margin:0.3rem 0;font-size:2.5rem;font-weight:800;color:white">{fmt_eur(prix_est)}</p>
+            <p style="margin:0;font-size:0.95rem;opacity:0.8;color:white">
                 Fourchette indicative (±15%) : {fmt_eur(prix_bas)} — {fmt_eur(prix_haut)}
             </p>
         </div>
@@ -560,7 +589,7 @@ st.markdown(
     """
     <p class="disclaimer">
     Estimations basées sur DVF 2020-2025 + DPE ADEME. Modèle XGBoost
-    (R²=0.81, MAPE=29.68%). Pour une valorisation précise, consultez un professionnel.
+    (R²=0.80, MAPE=31.45%). Pour une valorisation précise, consultez un professionnel.
     </p>
     """,
     unsafe_allow_html=True,
