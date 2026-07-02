@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn>=0.30
+xgboost>=2.0
+mlflow>=2.14
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+prometheus-client>=0.20
+pydantic>=2.0
