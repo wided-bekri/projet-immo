@@ -425,7 +425,7 @@ with tab_master_data:
     <div style="background: linear-gradient(135deg, #1f4068 0%, #162447 100%); padding: 22px; border-radius: 10px; border-left: 6px solid #00eaaf;">
         <h4 style="color:#00eaaf !important; margin-top:0; font-weight:700; font-size:1.15rem;">🔄 Transition : Du Script Artisanal à l'Industrialisation MLOps</h4>
         <p style="font-size:0.92rem; margin-bottom:0; opacity:0.95; line-height:1.55;">
-            <b>« Messieurs les membres du jury, ce pipeline de préparation fonctionne parfaitement en local.</b> Nous avons nettoyé les outliers, redressé les valeurs aberrantes et enrichi notre base avec 5 sources publiques. Cependant, exécuter ce travail à la main dans un notebook à chaque mise à jour du marché immobilier est impossible en production.<br>
+            <b>« Messieurs les membres du jury, ce pipeline de préparation fonctionne parfaitement en local.</b> Nous avons nettoyé les outliers, redressé les valeurs aberrantes et enrichi notre base avec 7 sources publiques (DVF, Filosofi, BPE, Criminalité, DPE, Gares SNCF, Population INSEE). Cependant, exécuter ce travail à la main dans un notebook à chaque mise à jour du marché immobilier est impossible en production.<br>
             Pour garantir la reproductibilité, le suivi de nos expériences de calcul et la gouvernance stricte de nos données, nous avons déployé une architecture industrielle. <b>Découvrons maintenant la Phase III : Tracking & Versioning avec MLflow et DVC (Sélectionnez le deuxième onglet principal en haut de la page). »</b>
         </p>
     </div>
