@@ -1,11 +1,4 @@
 stages:
-  prepare_streamlit_data:
-    cmd: python app/prepare_streamlit_data.py
-    deps:
-      - app/prepare_streamlit_data.py
-    outs:
-      - data/processed/streamlit_data.parquet
-
   train_baseline:
     cmd: python src/pipeline/train_model.py
     deps:

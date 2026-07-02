@@ -61,6 +61,22 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  streamlit:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.streamlit
+    container_name: immo-streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    networks:
+      - immo-network
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: immo-prometheus
