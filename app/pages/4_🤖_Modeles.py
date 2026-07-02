@@ -434,7 +434,7 @@ st.success("""
     
 ✔️ Les modèles de boosting (XGBoost) sont les plus adaptés  
     
-✔️ La segmentation par sous-marchés améliore fortement la performance (-4,42 points de MAPE)  
+✔️ Un modèle global unique sur 3,58M exemples offre robustesse et maintenabilité en production
     
 ✔️ Le résiduel permet de capturer la vraie valeur intrinsèque du bien  
 
