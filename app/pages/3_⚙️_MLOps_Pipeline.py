@@ -374,6 +374,267 @@ for i, (icon, container, service, port, role) in enumerate(services, 1):
 
 st.write("---")
 
+# ─── Kubernetes ───────────────────────────────────────────────────────────────
+st.markdown("## ☸️ Kubernetes — Prêt pour la production cloud")
+
+k8s_intro, k8s_why = st.columns(2)
+
+with k8s_intro:
+    st.info("""
+    **Kubernetes** est la prochaine étape naturelle après Docker Compose.
+    Là où Docker Compose orchestre des conteneurs sur **une seule machine**,
+    Kubernetes orchestre des conteneurs sur un **cluster de machines**.
+
+    Notre projet inclut les manifests YAML dans le dossier `k8s/` pour déployer
+    l'intégralité de l'infrastructure sur un cluster Kubernetes (ex: k3s, EKS, GKE).
+    """)
+
+with k8s_why:
+    st.success("""
+    **Pourquoi Kubernetes en production ?**
+
+    - 🔄 **Auto-healing** : si un pod tombe, Kubernetes le redémarre automatiquement
+    - 📈 **Scalabilité** : l'API FastAPI passe de 1 à N replicas en une commande
+    - 🔐 **Secrets natifs** : clés API, mots de passe encodés en base64
+    - 💾 **Stockage persistant** : PV/PVC pour MLflow, PostgreSQL, Grafana
+    - 🏥 **Health checks** : liveness & readiness probes sur tous les services
+    """)
+
+st.markdown("### 📁 Structure des manifests `k8s/`")
+
+tab_k1, tab_k2, tab_k3, tab_k4 = st.tabs(["🔐 Secrets & Config", "💾 Stockage", "🚀 Deployments", "🔌 Services"])
+
+with tab_k1:
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown("**`k8s/secrets/secrets.yml`**")
+        st.code("""
+apiVersion: v1
+kind: Secret
+metadata:
+  name: immo-api-secret
+  namespace: immo
+type: Opaque
+data:
+  # echo -n 'my-api-key' | base64
+  IMMO_API_KEY: eW91ci1hcGkta2V5LWhlcmU=
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: immo-airflow-secret
+  namespace: immo
+type: Opaque
+data:
+  POSTGRES_USER: YWlyZmxvdw==
+  POSTGRES_PASSWORD: YWlyZmxvdw==
+  AIRFLOW_SECRET_KEY: Y29tcGFnbm9uLWltbW8tc2VjcmV0
+        """, language="yaml")
+    with col_s2:
+        st.markdown("**`k8s/configmaps/configmaps.yml`**")
+        st.code("""
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-api-config
+  namespace: immo
+data:
+  MLFLOW_TRACKING_URI: "http://mlflow-service:5000"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-streamlit-config
+  namespace: immo
+data:
+  API_URL: "http://api-service:8000"
+  AIRFLOW_URL: "http://airflow-webserver-service:8080"
+  PROMETHEUS_URL: "http://prometheus-service:9090"
+        """, language="yaml")
+
+with tab_k2:
+    st.markdown("**`k8s/storage/persistent-volumes.yml`** — 4 volumes persistants")
+    st.code("""
+# PV MLflow (modèles XGBoost + artifacts)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mlflow-pv
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: immo
+    name: mlflow-pvc
+  hostPath:
+    path: "/mnt/immo/mlflow"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-pvc
+  namespace: immo
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+    """, language="yaml")
+    st.caption("Même pattern pour PostgreSQL (2Gi), Grafana (1Gi) et Airflow DAGs (2Gi)")
+
+with tab_k3:
+    st.markdown("**Déploiement de l'API avec 2 replicas et health checks**")
+    st.code("""
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: immo
+spec:
+  replicas: 2          # Haute disponibilité
+  selector:
+    matchLabels:
+      app: api
+  template:
+    spec:
+      containers:
+        - name: api
+          image: immo-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: immo-api-config
+          env:
+            - name: IMMO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: immo-api-secret
+                  key: IMMO_API_KEY
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+    """, language="yaml")
+
+with tab_k4:
+    col_svc1, col_svc2 = st.columns(2)
+    with col_svc1:
+        st.markdown("**Services internes (ClusterIP)**")
+        st.code("""
+# MLflow — interne au cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-service
+  namespace: immo
+spec:
+  type: ClusterIP
+  selector:
+    app: mlflow
+  ports:
+    - port: 5000
+      targetPort: 5000
+
+# API — interne au cluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: immo
+spec:
+  type: ClusterIP
+  selector:
+    app: api
+  ports:
+    - port: 8000
+      targetPort: 8000
+        """, language="yaml")
+    with col_svc2:
+        st.markdown("**Services externes (NodePort)**")
+        st.code("""
+# Streamlit — accès navigateur
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit-service
+  namespace: immo
+spec:
+  type: NodePort
+  selector:
+    app: streamlit
+  ports:
+    - port: 8501
+      targetPort: 8501
+      nodePort: 30501
+
+# Airflow UI
+---
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 30080   # airflow
+
+# Prometheus
+---
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 30090   # prometheus
+
+# Grafana
+---
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 30030   # grafana
+        """, language="yaml")
+
+st.markdown("### ⚡ Déploiement en une commande")
+st.code("""
+# 1. Créer le namespace
+kubectl apply -f k8s/namespace.yml
+
+# 2. Tout déployer d'un coup
+bash k8s/deploy.sh
+
+# 3. Vérifier que tout tourne
+kubectl get all -n immo
+
+# Résultat attendu :
+# pod/api-xxx              2/2   Running   ✅
+# pod/mlflow-xxx           1/1   Running   ✅
+# pod/streamlit-xxx        1/1   Running   ✅
+# pod/airflow-xxx          1/1   Running   ✅
+# pod/prometheus-xxx       1/1   Running   ✅
+# pod/grafana-xxx          1/1   Running   ✅
+""", language="bash")
+
+st.write("---")
+
 # ─── Transition ────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="background:linear-gradient(135deg,#0f2027,#1a3a4a);padding:22px;border-radius:10px;border-left:6px solid #00eaaf;">

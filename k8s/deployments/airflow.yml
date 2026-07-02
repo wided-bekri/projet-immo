@@ -1,0 +1,111 @@
+---
+# Airflow Webserver
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: immo
+  labels:
+    app: airflow-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      initContainers:
+        - name: airflow-init
+          image: apache/airflow:2.9.1-python3.11
+          command:
+            - bash
+            - -c
+            - |
+              airflow db migrate &&
+              airflow users create --username admin --password admin \
+                --firstname Admin --lastname User \
+                --role Admin --email admin@immo.fr || true
+          envFrom:
+            - configMapRef:
+                name: immo-airflow-config
+          env:
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: immo-airflow-secret
+                  key: AIRFLOW_SECRET_KEY
+          volumeMounts:
+            - name: dags
+              mountPath: /opt/airflow/dags
+      containers:
+        - name: airflow-webserver
+          image: apache/airflow:2.9.1-python3.11
+          command: ["airflow", "webserver"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: immo-airflow-config
+          env:
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: immo-airflow-secret
+                  key: AIRFLOW_SECRET_KEY
+          volumeMounts:
+            - name: dags
+              mountPath: /opt/airflow/dags
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+      volumes:
+        - name: dags
+          persistentVolumeClaim:
+            claimName: airflow-dags-pvc
+
+---
+# Airflow Scheduler
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: immo
+  labels:
+    app: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      containers:
+        - name: airflow-scheduler
+          image: apache/airflow:2.9.1-python3.11
+          command: ["airflow", "scheduler"]
+          envFrom:
+            - configMapRef:
+                name: immo-airflow-config
+          env:
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: immo-airflow-secret
+                  key: AIRFLOW_SECRET_KEY
+          volumeMounts:
+            - name: dags
+              mountPath: /opt/airflow/dags
+      volumes:
+        - name: dags
+          persistentVolumeClaim:
+            claimName: airflow-dags-pvc

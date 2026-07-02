@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: immo
+  labels:
+    project: compagnon-immobilier
+    env: production
