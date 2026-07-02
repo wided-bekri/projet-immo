@@ -10,7 +10,7 @@ services:
     environment:
       - MLFLOW_SERVER_ALLOWED_HOSTS=*
     volumes:
-      - ./mlflow.db:/mlflow.db
+      - mlflow_db:/mlflow
       - mlflow_artifacts:/mlflow/artifacts
     networks:
       - immo-network
@@ -170,6 +170,7 @@ services:
         condition: service_completed_successfully
 
 volumes:
+  mlflow_db:
   mlflow_artifacts:
   grafana_data:
   postgres_data:
