@@ -240,7 +240,7 @@ st.markdown("---")
 # 🟦 5. ARCHITECTURE MULTI-MODÈLES
 # ==================================================
 st.header("4️⃣ Une architecture spécialisée")
-st.markdown("#### 🔀 Segmentation multi-modèles (6 modèles XGBoost indépendants)")
+st.markdown("#### 🎯 Modèle unique XGBoost — entraîné sur 3,58M transactions tous segments confondus")
 
 # Section visuelle propre sous forme de colonnes de blocs (Remplace l'ASCII tree)
 b1, b2, b3 = st.columns(3)
@@ -302,7 +302,7 @@ col2.metric(label="📉 MAE", value="648 €/m²")
 col3.metric(label="📉 RMSE", value="1 014 €/m²")
 col4.metric(label="🎯 MAPE Final", value="31.45 %")
 
-st.success("📈 Amélioration significative grâce à la segmentation territoriale")
+st.success("📈 R²=0.80 — Modèle XGBoost Single robuste, entraîné sur 3,58M transactions DVF 2020-2025")
 
 # Section d'affichage du graphique delta
 st.markdown("<br>", unsafe_allow_html=True)
