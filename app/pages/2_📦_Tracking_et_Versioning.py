@@ -112,7 +112,7 @@ st.write("---")
 # ==================================================
 # 5. L'ÉCOSYSTÈME DE PRODUCTION DOCKER COMPOSE
 # ==================================================
-st.markdown("### 🔌 L'Écosystème de Production final (9 Microservices)")
+st.markdown("### 🔌 L'Écosystème de Production final (10 Microservices)")
 st.caption("Notre architecture logicielle isolée, résiliente et distribuée définie dans docker-compose.yml.")
 
 service_selection = st.selectbox(
