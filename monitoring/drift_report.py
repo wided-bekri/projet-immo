@@ -29,11 +29,17 @@ ALL_FEATURES = NUM_FEATURES + CAT_FEATURES
 REPORTS_DIR = os.path.join(os.path.dirname(__file__), "reports")
 
 
-def load_and_prepare(path: str, sample: int = 50000) -> pd.DataFrame:
-    df = pd.read_csv(path, low_memory=False)
-    cols = ALL_FEATURES + [TARGET]
-    df = df[cols].dropna(subset=[TARGET])
-    df["code_departement"] = df["code_departement"].astype(str)
+def load_and_prepare(path: str, sample: int = 5000) -> pd.DataFrame:
+    # Lecture par chunks pour éviter les OOM sur petits conteneurs
+    chunks = []
+    for chunk in pd.read_csv(path, low_memory=False, chunksize=10000):
+        cols = [c for c in ALL_FEATURES + [TARGET] if c in chunk.columns]
+        chunk = chunk[cols].dropna(subset=[TARGET])
+        chunk["code_departement"] = chunk["code_departement"].astype(str)
+        chunks.append(chunk)
+        if sum(len(c) for c in chunks) >= sample:
+            break
+    df = pd.concat(chunks, ignore_index=True)
     if len(df) > sample:
         df = df.sample(sample, random_state=42)
     return df
