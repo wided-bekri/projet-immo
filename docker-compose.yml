@@ -14,6 +14,7 @@ services:
       - mlflow_artifacts:/mlflow/artifacts
     networks:
       - immo-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
@@ -36,6 +37,7 @@ services:
     command: uvicorn src.services.inference.inference_service:app --host 0.0.0.0 --port 8000
     networks:
       - immo-network
+    restart: unless-stopped
     depends_on:
       mlflow:
         condition: service_healthy
@@ -92,6 +94,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - immo-network
+    restart: unless-stopped
     depends_on:
       - api
 
@@ -107,6 +110,7 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     networks:
       - immo-network
+    restart: unless-stopped
     depends_on:
       - prometheus
 
@@ -121,6 +125,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - immo-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -167,6 +172,7 @@ services:
       - ./dvf_2025_clean.csv:/opt/airflow/dvf_2025_clean.csv:ro
     networks:
       - immo-network
+    restart: unless-stopped
     command: airflow webserver
     depends_on:
       postgres:
@@ -192,6 +198,7 @@ services:
       - ./dvf_2025_clean.csv:/opt/airflow/dvf_2025_clean.csv:ro
     networks:
       - immo-network
+    restart: unless-stopped
     command: airflow scheduler
     depends_on:
       postgres:
