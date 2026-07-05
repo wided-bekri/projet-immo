@@ -9,7 +9,7 @@ import mlflow.xgboost
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel, Field, field_validator
-from prometheus_client import Counter, Histogram, make_asgi_app
+from prometheus_client import Counter, Histogram, Gauge, make_asgi_app
 
 # === Logging ===
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +26,21 @@ mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 PREDICTION_COUNT = Counter("immo_predictions_total", "Nombre total de predictions")
 PREDICTION_LATENCY = Histogram("immo_prediction_latency_seconds", "Latence des predictions")
 PREDICTION_ERRORS = Counter("immo_prediction_errors_total", "Nombre d erreurs de prediction")
+DRIFT_SHARE = Gauge("immo_drift_share_of_columns", "Part des features en drift (Evidently)")
+DRIFT_DETECTED = Gauge("immo_drift_detected", "1 si drift detecte, 0 sinon")
+
+def _load_drift_metrics():
+    """Charge les métriques drift depuis le JSON Evidently et met à jour Prometheus."""
+    import json
+    metrics_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "monitoring", "reports", "drift_metrics.json")
+    try:
+        with open(metrics_path) as f:
+            data = json.load(f)
+        latest = sorted(data.items(), key=lambda x: x[1].get("timestamp", ""))[-1][1]
+        DRIFT_SHARE.set(latest.get("share_of_drifted_columns", 0.0))
+        DRIFT_DETECTED.set(1.0 if latest.get("drift_detected") else 0.0)
+    except Exception:
+        pass
 
 # === Etat global ===
 state = {
@@ -197,6 +212,7 @@ def build_features(req: PredictionRequest) -> pd.DataFrame:
 async def lifespan(_: FastAPI):
     logger.info("Demarrage de l API Compagnon Immobilier...")
     load_model_from_mlflow()
+    _load_drift_metrics()
     yield
     logger.info("Arret de l API.")
 
@@ -261,6 +277,16 @@ def predict(req: PredictionRequest, x_api_key: Optional[str] = Header(default=No
         PREDICTION_ERRORS.inc()
         logger.error(f"Erreur prediction : {e}")
         raise HTTPException(status_code=500, detail=f"Erreur de prediction : {str(e)}")
+
+
+@app.get("/metrics/drift")
+def metrics_drift():
+    """Rafraîchit et retourne les métriques de drift depuis Evidently."""
+    _load_drift_metrics()
+    return {
+        "drift_share_of_columns": DRIFT_SHARE._value.get(),
+        "drift_detected": bool(DRIFT_DETECTED._value.get()),
+    }
 
 
 @app.post("/reload_model")
