@@ -70,6 +70,7 @@ services:
       - "8501:8501"
     environment:
       - API_URL=http://api:8000
+      - PROMETHEUS_URL=http://prometheus:9090
     networks:
       - immo-network
     depends_on:

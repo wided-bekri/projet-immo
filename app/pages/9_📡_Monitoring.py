@@ -64,7 +64,7 @@ with tab1:
     st.markdown('<div class="section-title">Métriques API — Prometheus</div>', unsafe_allow_html=True)
 
     API_URL = os.environ.get("API_URL", "http://localhost:8000")
-    PROMETHEUS_URL = "http://localhost:9090"
+    PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL", "http://immo-prometheus:9090")
 
     def query_prometheus(query: str):
         try:
