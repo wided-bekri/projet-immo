@@ -161,6 +161,10 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
+      - ./monitoring:/opt/airflow/monitoring
+      - ./dvf_2022_clean.csv:/opt/airflow/dvf_2022_clean.csv:ro
+      - ./dvf_2024_clean.csv:/opt/airflow/dvf_2024_clean.csv:ro
+      - ./dvf_2025_clean.csv:/opt/airflow/dvf_2025_clean.csv:ro
     networks:
       - immo-network
     command: airflow webserver
@@ -182,6 +186,10 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
+      - ./monitoring:/opt/airflow/monitoring
+      - ./dvf_2022_clean.csv:/opt/airflow/dvf_2022_clean.csv:ro
+      - ./dvf_2024_clean.csv:/opt/airflow/dvf_2024_clean.csv:ro
+      - ./dvf_2025_clean.csv:/opt/airflow/dvf_2025_clean.csv:ro
     networks:
       - immo-network
     command: airflow scheduler

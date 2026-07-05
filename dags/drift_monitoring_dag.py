@@ -45,35 +45,43 @@ def check_drift(**context):
     Sauvegarde le résultat dans drift_metrics.json.
     Retourne le share_of_drifted_columns via XCom.
     """
-    try:
-        import pandas as pd
-        from evidently import Report
-        from evidently.presets import DataDriftPreset
+    import pandas as pd
 
-        NUM_FEATURES = [
-            "surface_reelle_bati", "nombre_pieces_principales",
-            "surface_terrain", "longitude", "latitude", "mois",
-        ]
-        CAT_FEATURES = ["type_local", "nature_mutation", "code_departement"]
-        TARGET = "prix_m2"
-        ALL_FEATURES = NUM_FEATURES + CAT_FEATURES
+    NUM_FEATURES = [
+        "surface_reelle_bati", "nombre_pieces_principales",
+        "surface_terrain", "longitude", "latitude", "mois",
+    ]
+    CAT_FEATURES = ["type_local", "nature_mutation", "code_departement"]
+    TARGET = "prix_m2"
+    ALL_FEATURES = NUM_FEATURES + CAT_FEATURES
+    SAMPLE = 5000
 
-        ref_path  = os.path.join(DATA_DIR, "dvf_2022_clean.csv")
-        curr_path = os.path.join(DATA_DIR, "dvf_2025_clean.csv")
+    def load_chunked(path):
+        chunks = []
+        for chunk in pd.read_csv(path, low_memory=False, chunksize=10000):
+            cols = [c for c in ALL_FEATURES + [TARGET] if c in chunk.columns]
+            chunk = chunk[cols].dropna(subset=[TARGET])
+            chunk["code_departement"] = chunk["code_departement"].astype(str)
+            chunks.append(chunk)
+            if sum(len(c) for c in chunks) >= SAMPLE:
+                break
+        df = pd.concat(chunks, ignore_index=True)
+        return df.sample(min(SAMPLE, len(df)), random_state=42)
 
-        if not os.path.exists(ref_path) or not os.path.exists(curr_path):
-            logger.warning("Fichiers CSV introuvables — drift simulé à 0.4")
-            share = 0.4
-        else:
-            def load(path):
-                df = pd.read_csv(path, low_memory=False)
-                cols = ALL_FEATURES + [TARGET]
-                df = df[[c for c in cols if c in df.columns]].dropna(subset=[TARGET])
-                df["code_departement"] = df["code_departement"].astype(str)
-                return df.sample(min(30000, len(df)), random_state=42)
+    share = 0.0
+    ref_path  = os.path.join(DATA_DIR, "dvf_2022_clean.csv")
+    curr_path = os.path.join(DATA_DIR, "dvf_2025_clean.csv")
 
-            ref  = load(ref_path)
-            curr = load(curr_path)
+    if not os.path.exists(ref_path) or not os.path.exists(curr_path):
+        logger.warning("Fichiers CSV introuvables — drift simulé à 0.4")
+        share = 0.4
+    else:
+        try:
+            from evidently import Report
+            from evidently.presets import DataDriftPreset
+
+            ref  = load_chunked(ref_path)
+            curr = load_chunked(curr_path)
 
             report = Report([DataDriftPreset()])
             result = report.run(reference_data=ref, current_data=curr)
@@ -85,32 +93,43 @@ def check_drift(**context):
                 d = result.dict()
                 info = d["metrics"][0]["value"]
                 share = float(info.get("share_of_drifted_columns", 0.0))
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Extraction métriques Evidently échouée : {e}")
                 share = 0.0
 
-        # Persister métriques
-        metrics = {}
-        if os.path.exists(METRICS_FILE):
+            logger.info(f"[drift] Evidently : share_drifted={share:.1%}")
+
+        except ImportError:
+            logger.warning("Evidently non installé dans ce conteneur — drift simulé à 0.0")
+            share = 0.0
+        except MemoryError:
+            logger.warning("OOM lors du calcul drift — drift simulé à 0.0")
+            share = 0.0
+        except Exception as e:
+            logger.error(f"Erreur Evidently : {e} — drift simulé à 0.0")
+            share = 0.0
+
+    # Persister métriques
+    os.makedirs(os.path.join(MONITORING_DIR, "reports"), exist_ok=True)
+    metrics = {}
+    if os.path.exists(METRICS_FILE):
+        try:
             with open(METRICS_FILE) as f:
                 metrics = json.load(f)
+        except Exception:
+            metrics = {}
 
-        import pandas as pd
-        metrics["airflow_latest"] = {
-            "drift_detected": share >= DRIFT_THRESHOLD,
-            "share_of_drifted_columns": share,
-            "timestamp": pd.Timestamp.now().isoformat(),
-        }
-        with open(METRICS_FILE, "w") as f:
-            json.dump(metrics, f, indent=2)
+    metrics["airflow_latest"] = {
+        "drift_detected": share >= DRIFT_THRESHOLD,
+        "share_of_drifted_columns": share,
+        "timestamp": pd.Timestamp.now().isoformat(),
+    }
+    with open(METRICS_FILE, "w") as f:
+        json.dump(metrics, f, indent=2)
 
-        logger.info(f"[drift] share_drifted={share:.1%} | seuil={DRIFT_THRESHOLD:.0%}")
-        context["ti"].xcom_push(key="share_drifted", value=share)
-        return {"share_drifted": share, "drift_detected": share >= DRIFT_THRESHOLD}
-
-    except Exception as e:
-        logger.error(f"Erreur check_drift : {e}")
-        context["ti"].xcom_push(key="share_drifted", value=0.0)
-        return {"share_drifted": 0.0, "drift_detected": False}
+    logger.info(f"[drift] share_drifted={share:.1%} | seuil={DRIFT_THRESHOLD:.0%}")
+    context["ti"].xcom_push(key="share_drifted", value=share)
+    return {"share_drifted": share, "drift_detected": share >= DRIFT_THRESHOLD}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
