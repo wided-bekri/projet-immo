@@ -2,8 +2,10 @@
 Phase 4 - Drift Monitoring avec Evidently 0.7+
 Référence : données 2022
 Courant    : données 2024 ou 2025
+Métriques Prometheus : sauvegardées dans monitoring/reports/drift_metrics.json
 """
 import os
+import json
 import pandas as pd
 from evidently import Report
 from evidently.presets import DataDriftPreset
@@ -37,6 +39,9 @@ def load_and_prepare(path: str, sample: int = 50000) -> pd.DataFrame:
     return df
 
 
+METRICS_FILE = os.path.join(REPORTS_DIR, "drift_metrics.json")
+
+
 def run_data_drift_report(reference: pd.DataFrame, current: pd.DataFrame, label: str):
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
@@ -47,16 +52,41 @@ def run_data_drift_report(reference: pd.DataFrame, current: pd.DataFrame, label:
     result.save_html(out)
     print(f"[drift] Rapport sauvegardé : {out}")
 
-    # Extraire le statut drift
-    result_dict = result.dict()
+    # Extraire métriques de drift
+    share_drifted = 0.0
+    drift_detected = False
     try:
+        result_dict = result.dict()
         drift_info = result_dict["metrics"][0]["value"]
-        drift_detected = drift_info.get("dataset_drift", drift_info.get("share_of_drifted_columns", 0) > 0.5)
-        print(f"[drift] 2022 → {label.split('_')[-1]} : drift={drift_detected}")
+        share_drifted = drift_info.get("share_of_drifted_columns", 0.0)
+        drift_detected = drift_info.get("dataset_drift", share_drifted > 0.5)
+        print(f"[drift] 2022 → {label.split('_')[-1]} : drift={drift_detected} ({share_drifted:.1%} features)")
     except Exception:
-        print(f"[drift] Rapport {label} généré.")
+        print(f"[drift] Rapport {label} généré (extraction métriques échouée).")
 
-    return result
+    # Sauvegarder métriques JSON pour Prometheus/Streamlit
+    metrics = _load_metrics()
+    metrics[label] = {
+        "drift_detected": bool(drift_detected),
+        "share_of_drifted_columns": float(share_drifted),
+        "timestamp": pd.Timestamp.now().isoformat(),
+    }
+    _save_metrics(metrics)
+
+    return result, share_drifted, drift_detected
+
+
+def _load_metrics() -> dict:
+    if os.path.exists(METRICS_FILE):
+        with open(METRICS_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+
+def _save_metrics(metrics: dict):
+    with open(METRICS_FILE, "w") as f:
+        json.dump(metrics, f, indent=2)
+    print(f"[drift] Métriques sauvegardées : {METRICS_FILE}")
 
 
 if __name__ == "__main__":
@@ -72,9 +102,12 @@ if __name__ == "__main__":
     print(f"Courant  2025  : {len(cur_2025)} lignes")
 
     print("\n=== Rapport drift 2022 -> 2024 ===")
-    run_data_drift_report(ref, cur_2024, "2022_vs_2024")
+    _, share_2024, detected_2024 = run_data_drift_report(ref, cur_2024, "2022_vs_2024")
+    print(f"  → {share_2024:.1%} features en drift | drift global = {detected_2024}")
 
     print("\n=== Rapport drift 2022 -> 2025 ===")
-    run_data_drift_report(ref, cur_2025, "2022_vs_2025")
+    _, share_2025, detected_2025 = run_data_drift_report(ref, cur_2025, "2022_vs_2025")
+    print(f"  → {share_2025:.1%} features en drift | drift global = {detected_2025}")
 
     print("\nPhase 4 terminee. Rapports dans monitoring/reports/")
+    print("Métriques JSON sauvegardées dans monitoring/reports/drift_metrics.json")
