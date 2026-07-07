@@ -1,0 +1,13 @@
+artifact_uri: E:/Desktop/Projet Immo/mlruns/1/32999bba8cec4bb9800aef777680080e/artifacts
+end_time: 1781696902728
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+run_id: 32999bba8cec4bb9800aef777680080e
+run_name: GLOBAL
+source_name: mlops/log_to_mlflow_local.py
+source_type: 1
+source_version: ''
+start_time: 1781696902628
+status: 3
+user_id: wided

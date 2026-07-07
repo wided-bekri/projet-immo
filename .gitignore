@@ -7,9 +7,8 @@ __pycache__/
 venv/
 
 ## MLflow
-mlruns/
 mlartifacts/
-mlflow.db
+# mlruns/ et mlflow.db versionnés pour partage équipe
 
 ## DVC (données volumineuses — gérées par DVC)
 data/processed/

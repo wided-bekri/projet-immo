@@ -1,0 +1,13 @@
+artifact_uri: E:/Desktop/Projet Immo/mlruns/1/fc3f9b371d9d4e5fbf8d92b9b13ba68c/artifacts
+end_time: 1781696899757
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+run_id: fc3f9b371d9d4e5fbf8d92b9b13ba68c
+run_name: milieu_maison
+source_name: mlops/log_to_mlflow_local.py
+source_type: 1
+source_version: ''
+start_time: 1781696899657
+status: 3
+user_id: wided

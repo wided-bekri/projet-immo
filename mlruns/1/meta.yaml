@@ -1,0 +1,4 @@
+artifact_location: E:/Desktop/Projet Immo/mlruns/1/artifacts
+experiment_id: '1'
+lifecycle_stage: active
+name: compagnon-immo-xgboost-6segments
