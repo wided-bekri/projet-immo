@@ -10,7 +10,8 @@ services:
     environment:
       - MLFLOW_SERVER_ALLOWED_HOSTS=*
     volumes:
-      - mlflow_db:/mlflow
+      - ./mlflow.db:/mlflow/mlflow.db
+      - ./mlruns:/mlflow/mlruns
       - mlflow_artifacts:/mlflow/artifacts
     networks:
       - immo-network
