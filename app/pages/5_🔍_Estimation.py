@@ -7,7 +7,11 @@ import pandas as pd
 import numpy as np
 import pickle
 import os
+import requests
 from datetime import datetime
+
+_API_BASE = os.environ.get("API_URL", "http://api:8000")
+API_PREDICT_URL = f"{_API_BASE}/predict"
 
 st.set_page_config(
     page_title="Estimation - Compagnon Immobilier",
@@ -296,9 +300,32 @@ if surface:
             "commune_volume_appart": float(row.get("commune_volume_appart") or 50),
             "prix_estime_commune": float(pm2_global),
         }])
-        residuel = float(model.predict(X)[0])
-        prix_m2_ml = max(300.0, min(15000.0, residuel + pm2_global))
-        prix_est = prix_m2_ml * surface
+        # Appel API FastAPI (incrémente Prometheus)
+        payload = {
+            "surface_reelle_bati": surface,
+            "nombre_pieces_principales": nb_pieces,
+            "type_bien": "maison" if is_maison_flag else "appart",
+            "surface_terrain": 0.0,
+            "annee": 2025,
+            "mois": 6,
+            "code_departement": str(row["code_departement"]),
+            "longitude": float(row["longitude"]),
+            "latitude": float(row["latitude"]),
+            "commune_prix_m2": float(pm2_global),
+            "dept_prix_m2": float(pm2_dept if not pd.isna(pm2_dept) else pm2_global),
+            "prix_estime_commune": float(pm2_global),
+        }
+        try:
+            resp = requests.post(API_PREDICT_URL, json=payload, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            prix_m2_ml = data["prediction_eur_m2"]
+            prix_est = data["prediction_total_eur"]
+        except Exception:
+            # Fallback local si l'API est indisponible
+            residuel = float(model.predict(X)[0])
+            prix_m2_ml = max(300.0, min(15000.0, residuel + pm2_global))
+            prix_est = prix_m2_ml * surface
     except Exception:
         prix_m2_ml = pm2_type
         prix_est = pm2_type * surface
