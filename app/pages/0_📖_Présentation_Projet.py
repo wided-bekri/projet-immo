@@ -182,7 +182,7 @@ with col1:
         
         st.markdown("""
         - 🔎 **Préparer les données :** Nettoyage, contrôle qualité et consolidation de plus de 20M de transactions DVF.
-        - 🧩 **Enrichir l'information :** Croisement avec Filosofi, BPE, Sécurité pour décrire l'environnement.
+        - 🧩 **Enrichir l'information :** Croisement avec DPE, Filosofi, BPE, Sécurité, SNCF pour décrire l'environnement.
         - ⚙️ **Construire les variables métier :** Création de features pertinentes pour capturer les facteurs de valeur.
         - 🤖 **Apprendre à estimer :** Entraînement et optimisation d'un modèle XGBoost unifié.
         """)
