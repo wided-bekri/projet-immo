@@ -70,20 +70,21 @@ services:
       dockerfile: dockerfiles/Dockerfile.streamlit
     container_name: immo-streamlit
     ports:
-      - "8501:8501"
+    - "8501:8501"
     environment:
-      - API_URL=http://api:8000
-      - PROMETHEUS_URL=http://prometheus:9090
+      API_URL: http://api:8000
+      PROMETHEUS_URL: http://prometheus:9090
     volumes:
-      - ./monitoring:/app/monitoring
-      - ./dvf_2022_clean.csv:/app/dvf_2022_clean.csv:ro
-      - ./dvf_2024_clean.csv:/app/dvf_2024_clean.csv:ro
-      - ./dvf_2025_clean.csv:/app/dvf_2025_clean.csv:ro
-    networks:
-      - immo-network
+    - ./app:/app/app
+    - ./monitoring:/app/monitoring
+    - ./dvf_2022_clean.csv:/app/dvf_2022_clean.csv:ro
+    - ./dvf_2024_clean.csv:/app/dvf_2024_clean.csv:ro
+    - ./dvf_2025_clean.csv:/app/dvf_2025_clean.csv:ro
     depends_on:
       api:
         condition: service_healthy
+    networks:
+    - immo-network
     restart: unless-stopped
 
   prometheus:
