@@ -1,70 +1,89 @@
 import streamlit as st
-import pandas as pd
 
-# 1. CONFIGURATION
-st.set_page_config(page_title="Infrastructure & Microservices", layout="wide")
+st.set_page_config(page_title="Infrastructure", layout="wide")
 
-# 2. FRISE DE PROGRESSION
-def render_pipeline_header(active_step):
-    steps = ["Infrastructure", "Orchestration", "Versioning", "Déploiement", "Monitoring"]
-    html_content = '<div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 30px;">'
-    for i, step in enumerate(steps):
-        is_active = (step == active_step)
-        color = "#17b978" if is_active else "#6c757d"
-        weight = "bold" if is_active else "normal"
-        html_content += f'<div style="text-align: center; color: {color}; font-weight: {weight}; font-size: 0.9rem;">{step}</div>'
-        if i < len(steps) - 1:
-            html_content += '<div style="color: #dee2e6;">➔</div>'
-    html_content += '</div>'
-    st.markdown(html_content, unsafe_allow_html=True)
-
-render_pipeline_header("Infrastructure")
-
-# 3. CONTENU
-st.header("🐳 2. Infrastructure & Microservices")
-st.markdown("### Construire un environnement reproductible")
-
-# Colonne gauche (Schéma + Cartes) / Colonne droite (Docker PS)
-col_l, col_r = st.columns([1.5, 1])
-
-with col_l:
-    st.subheader("Architecture Docker Compose")
-    
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Grille des 6 cartes
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown("**🐳 Docker**<br><small>Isolation des services.</small>", unsafe_allow_html=True)
-        st.markdown("**📦 Docker Compose**<br><small>Orchestration locale.</small>", unsafe_allow_html=True)
-    with c2:
-        st.markdown("**⚡ FastAPI**<br><small>API REST haute performance.</small>", unsafe_allow_html=True)
-        st.markdown("**🗄 PostgreSQL**<br><small>Persistance des données.</small>", unsafe_allow_html=True)
-    with c3:
-        st.markdown("**🧪 MLflow**<br><small>Tracking des modèles.</small>", unsafe_allow_html=True)
-        st.markdown("**📈 Prometheus**<br><small>Monitoring temps réel.</small>", unsafe_allow_html=True)
-
-with col_r:
-    st.subheader("État du cluster")
-    st.caption("Capture d'écran de l'environnement actif :")
-    st.info("docker ps")
-    # Simuler le tableau Docker PS propre
-    st.table(pd.DataFrame({
-        "CONTAINER": ["Frontend", "API-Gateway", "Inference", "MLflow", "Postgres", "Prometheus"],
-        "STATUS": ["Up 2h", "Up 2h", "Up 2h", "Up 2h", "Up 5d", "Up 5d"]
-    }))
-
-# 4. BAS DE PAGE : POURQUOI ?
-st.markdown("---")
-st.subheader("Pourquoi une architecture microservices ?")
-b1, b2, b3, b4 = st.columns(4)
-b1.metric("Découplage", "Indépendance")
-b2.metric("Évolutivité", "Scalable")
-b3.metric("Maintenance", "Modulaire")
-b4.metric("Déploiement", "Indépendant")
+st.title("🐳 Infrastructure & Microservices")
 
 st.markdown("""
-> L'approche microservices permet à chaque composant (API, ML, Monitoring) d'évoluer de manière autonome. 
-> Cela réduit le risque de régression lors des mises à jour et facilite la maintenance en conditions réelles.
+**Le problème qu'on avait :** comment faire tourner le projet de la même façon sur ma machine,
+sur la machine de Carine, et demain sur un serveur ?
+
+**La solution :** Docker. On a mis chaque outil dans une "boîte" isolée (un conteneur),
+et Docker Compose démarre toutes les boîtes ensemble avec une seule commande.
+""")
+
+st.markdown("---")
+
+st.header("Nos 9 services Docker")
+
+st.markdown("Chaque service fait **une seule chose**. Ils communiquent entre eux via un réseau interne.")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    with st.container(border=True):
+        st.markdown("### 🗄️ PostgreSQL")
+        st.markdown("Base de données d'Airflow. Stocke l'historique des tâches automatiques.")
+
+    with st.container(border=True):
+        st.markdown("### 📊 MLflow")
+        st.markdown("Enregistre chaque entraînement : métriques, paramètres, modèles. Notre journal de bord ML.")
+
+    with st.container(border=True):
+        st.markdown("### ⚡ FastAPI")
+        st.markdown("Reçoit les demandes de prédiction (JSON) et répond avec le prix estimé.")
+
+with col2:
+    with st.container(border=True):
+        st.markdown("### 🔒 Nginx")
+        st.markdown("Protège l'accès à l'API. Redirige tout en HTTPS et bloque les requêtes trop nombreuses (max 10/seconde).")
+
+    with st.container(border=True):
+        st.markdown("### 🏠 Streamlit")
+        st.markdown("L'interface utilisateur. Les pages que vous voyez maintenant.")
+
+    with st.container(border=True):
+        st.markdown("### 📡 Prometheus")
+        st.markdown("Collecte les métriques de l'API toutes les 15 secondes automatiquement.")
+
+with col3:
+    with st.container(border=True):
+        st.markdown("### 📈 Grafana")
+        st.markdown("Affiche les métriques Prometheus sous forme de graphiques en temps réel.")
+
+    with st.container(border=True):
+        st.markdown("### ⚙️ Airflow Scheduler")
+        st.markdown("Le planificateur : lance automatiquement les tâches selon le planning.")
+
+    with st.container(border=True):
+        st.markdown("### 🌐 Airflow Webserver")
+        st.markdown("L'interface web d'Airflow pour visualiser et surveiller les DAGs.")
+
+st.markdown("---")
+
+st.header("Comment les services se parlent ?")
+
+st.code("""
+Utilisateur
+    ↓
+Streamlit (port 8501)  ← interface web
+    ↓
+FastAPI (port 8000)    ← prédiction XGBoost
+    ↓
+MLflow (port 5000)     ← chargement du modèle
+
+En parallèle :
+Prometheus → scrape FastAPI /metrics toutes les 15s
+Grafana → affiche les métriques Prometheus
+Airflow → orchestre les tâches automatiques (drift, retraining)
+PostgreSQL → stocke les données Airflow
+""", language="")
+
+st.success("✅ Une seule commande pour tout démarrer : **docker compose up -d**")
+
+st.info("""
+💡 **Pourquoi c'est utile ?**
+Si le service FastAPI plante, Streamlit continue de fonctionner.
+Si Prometheus plante, l'API continue de faire des prédictions.
+Chaque service est indépendant → moins de risque de tout casser d'un coup.
 """)

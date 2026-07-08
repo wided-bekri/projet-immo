@@ -1,84 +1,106 @@
 import streamlit as st
 
-# 1. CONFIGURATION
 st.set_page_config(page_title="Pipeline & Gouvernance", layout="wide")
 
-# 2. FONCTION FRISE
-def render_pipeline_header(active_step):
-    steps = ["Infrastructure", "Orchestration", "Versioning", "Déploiement", "Monitoring"]
-    html_content = '<div style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 30px;">'
-    for i, step in enumerate(steps):
-        is_active = (step == active_step)
-        color = "#17b978" if is_active else "#6c757d"
-        weight = "bold" if is_active else "normal"
-        html_content += f'<div style="text-align: center; color: {color}; font-weight: {weight}; font-size: 0.9rem;">{step}</div>'
-        if i < len(steps) - 1:
-            html_content += '<div style="color: #dee2e6;">➔</div>'
-    html_content += '</div>'
-    st.markdown(html_content, unsafe_allow_html=True)
+st.title("⚙️ Pipeline d'entraînement & Gouvernance")
 
-render_pipeline_header("Versioning")
-
-# 3. BANDEAU D'INTRODUCTION (Adapté)
 st.markdown("""
-<div style="background: linear-gradient(135deg, #0f2027 0%, #203a43 100%); padding: 25px; border-radius: 12px; color: white; text-align: center; margin-bottom: 25px;">
-    <h1 style="color: #ffffff; margin: 0;">⚙️ Pipeline d'entraînement & Gouvernance</h1>
-    <p style="color: #00eaaf; margin-top: 10px; font-weight: 400;">Optimisation systématique et traçabilité du cycle de vie ML</p>
-</div>
-""", unsafe_allow_html=True)
-
-# 4. FIL D'ARIANE (Automatisation)
-st.markdown("""
-<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 25px;">
-    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 0.9rem; font-weight: bold;">
-        <span style="color: #17b978;">📐 Target Engineering</span> ➔
-        <span style="color: #17b978;">🧪 MLflow Runs</span> ➔
-        <span style="color: #17b978;">📦 Artefacts</span> ➔
-        <span style="color: #17b978;">👑 Production</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# 5. CONTENU : STRATÉGIE DE CIBLE (Anti-Data Leakage)
-st.subheader("1. Protocole expérimental & Target Engineering")
-col_split, col_bayes = st.columns([1.1, 0.9])
-
-with col_split:
-    with st.container(border=True):
-        st.markdown("**🛡️ Isolation stricte (Anti-Data Leakage)**")
-        st.write("• **Volume :** 4,48M de transactions (34 variables).")
-        st.write("• **Train Set (80%) :** 3,58M dédiés à l'apprentissage.")
-        st.write("• **Test Set (20%) :** 895k isolés pour validation.")
-        st.success("✔️ Les prix de référence sont calculés exclusivement sur le bloc Train.")
-
-with col_bayes:
-    with st.container(border=True):
-        st.markdown("**📈 Lissage Bayésien des encadrements spatiaux**")
-        st.latex(r"P_{\text{lissé}} = \frac{N_{\text{commune}} \cdot P_{\text{commune}} + K \cdot P_{\text{département}}}{N_{\text{commune}} + K}")
-        st.caption("Stabilisation des communes à faible historique de transactions.")
-
-# 6. LES TROIS PILIERS MLOPS
-st.markdown("---")
-st.subheader("2. Automatisation & Gouvernance")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("### ✈️ Airflow")
-    st.markdown("- **Automatisation** des tâches\n- **Planification** des réentraînements\n- **Orchestration** du DAG complet")
-
-with col2:
-    st.markdown("### 📦 DVC")
-    st.markdown("- **Versioning** des datasets\n- **Versioning** des modèles\n- **Reproductibilité** garantie")
-
-with col3:
-    st.markdown("### 🧪 MLflow")
-    st.markdown("- **Tracking** d'expériences\n- **Hyperparamètres** optimisés\n- **Model Registry**")
-
-# 7. CONCLUSION
-st.markdown("---")
-st.success("""
-### 🎯 Garantie de reproductibilité
-"Chaque modèle est entièrement reproductible, depuis le dataset source (DVC) jusqu'aux performances obtenues, garantissant une auditabilité totale du cycle de vie."
+Cette page explique comment on a **entraîné notre modèle** et comment on **garde une trace de tout**
+pour pouvoir reproduire les résultats à tout moment.
 """)
 
-st.info("👉 **Prochaine étape :** Mise en production avec **Déploiement & Inférence**.")
+st.markdown("---")
+
+st.header("1. Les données d'entraînement")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("### Ce qu'on a utilisé")
+    st.markdown("""
+    - **4,48 millions** de transactions immobilières (fichier DVF)
+    - Données de 2022 à 2025
+    - **31 variables** par transaction : surface, nombre de pièces, département, prix moyen de la commune, etc.
+    """)
+
+with col2:
+    st.markdown("### Comment on a découpé")
+    st.markdown("""
+    - **80% pour entraîner** le modèle → 3,58 millions de transactions
+    - **20% pour tester** les résultats → 895 000 transactions
+
+    Le modèle n'a jamais vu les données de test pendant l'entraînement.
+    C'est comme réviser avec un livre, puis passer un examen avec des nouvelles questions.
+    """)
+
+st.markdown("---")
+
+st.header("2. L'entraînement avec XGBoost")
+
+st.markdown("""
+On a choisi **XGBoost** parce que c'est un algorithme qui gère bien les données tabulaires
+(lignes et colonnes) et qui est rapide à entraîner même sur des millions de lignes.
+
+XGBoost construit des centaines d'arbres de décision les uns après les autres.
+Chaque arbre corrige les erreurs du précédent.
+""")
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Transactions analysées", "4,48M")
+col2.metric("MAE (erreur moyenne)", "648 €/m²")
+col3.metric("R² (précision globale)", "0.80")
+
+st.info("💡 **R² = 0.80** signifie que le modèle explique 80% des variations de prix. C'est correct pour un marché aussi complexe que l'immobilier français.")
+
+st.markdown("---")
+
+st.header("3. MLflow : notre journal de bord")
+
+st.markdown("""
+**Problème :** si on entraîne 10 versions du modèle avec des paramètres différents,
+comment on sait laquelle était la meilleure 3 semaines plus tard ?
+
+**Solution : MLflow.** À chaque entraînement, MLflow enregistre automatiquement :
+""")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown("**📊 Les métriques**")
+    st.markdown("MAE, R², RMSE — pour comparer les versions")
+with col2:
+    st.markdown("**⚙️ Les paramètres**")
+    st.markdown("n_estimators, max_depth, learning_rate — pour reproduire le modèle")
+with col3:
+    st.markdown("**📦 Le modèle**")
+    st.markdown("Le fichier du modèle entraîné — pour le réutiliser en production")
+
+st.markdown("---")
+
+st.header("4. Le Model Registry et l'alias 'production'")
+
+st.markdown("""
+Une fois qu'un modèle est validé, on lui donne l'alias **"production"** dans MLflow.
+
+FastAPI charge **toujours le modèle avec l'alias "production"**.
+Si on entraîne un meilleur modèle et qu'on change l'alias, FastAPI le prend automatiquement
+**sans avoir à modifier le code**.
+""")
+
+st.code("""
+# Ce que fait FastAPI au démarrage
+model = mlflow.load_model(alias="production")
+""", language="python")
+
+st.markdown("---")
+
+st.header("5. DVC : versioning des données")
+
+st.markdown("""
+Les fichiers de données font plusieurs Go — trop gros pour Git.
+**DVC** (Data Version Control) stocke les données sur DagsHub et garde dans Git
+uniquement un petit fichier pointeur qui dit "les données sont là-bas".
+
+Ainsi, n'importe qui peut récupérer exactement les mêmes données qu'on a utilisées.
+""")
+
+st.success("✅ Résultat : si quelqu'un veut reproduire notre modèle dans 6 mois, il peut récupérer les mêmes données (DVC) et voir tous les paramètres d'entraînement (MLflow).")
