@@ -45,6 +45,10 @@ gen_mockups.py
 *.odt
 *.docx
 *.txt
+# Conserver les fichiers requirements Docker
+!dockerfiles/requirements-airflow.txt
+!dockerfiles/requirements-inference.txt
+!dockerfiles/requirements-streamlit.txt
 *.bat
 contact.html
 k8s/
