@@ -17,13 +17,14 @@ st.markdown("""
 Bienvenue dans notre projet d'estimation immobilière.
 
 ### Fonctionnalités
-- 📊 Exploration des données
-- 🧹 Préprocessing
-- 🤖 Modélisation
-- 🏡 Estimation de prix
-- 📈 Évolution du marché
-- 🏘️ Comparaison de communes
-- 🗺️ Carte nationale
+- 📖_Présentation_Projet
+- 🤖_De la donnée brute à la donnée prédictive
+- 🏗️ Architecture Globale
+- 🐳 Infrastructure & Microservices
+- ⚙️ Pipeline d'entraînement & Gouvernance
+- 🚀 Déploiement & Inférence
+- 📈 Monitoring & Cycle de vie
+- 🔍_Estimation       
 """)
 
 

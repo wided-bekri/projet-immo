@@ -141,7 +141,7 @@ with st.container(border=True):
     st.markdown("""
     <div style="text-align: center; margin-top: 25px; padding: 10px; background-color: #EFF6FF; border-radius: 8px;">
         <p style="font-size: 1.1rem; color: #1E40AF; margin: 0; font-weight: 500;">
-            💡 <b>Ce qui n'était qu'une interrogation est devenu un modèle prédictif 
+            💡 <b>Ce qui n'était qu'une interrogation est devenu un modèle prédictif
         </p>
     </div>
     """, unsafe_allow_html=True)

@@ -143,22 +143,7 @@ with tab1:
 
 
     st.success("🎤 **Ce travail de filtrage sélectif est le préalable indispensable à tout projet MLOps sérieux.")
-# ==================================================
-# CONTENU AUTRES ONGLETS (À COMPLÉTER DEMAIN)
-# ==================================================
-# ==================================================
-# CONTENU ONGLET 2 : ENRICHISSEMENT
-# ==================================================
-with tab2:
-    st.header("🧩 2. Enrichir la donnée : La puissance du multi-sources")
-    st.markdown("##### *Objectif : Transformer une ligne de prix en un objet immobilier contextuel.*")
-
-    # ==================================================
-# DÉBUT ONGLET 2 : ENRICHISSEMENT
-# ==================================================
-# ==================================================
-# DÉBUT ONGLET 2 : ENRICHISSEMENT
-# ==================================================
+# 
 # ==================================================
 # CONTENU ONGLET 2 : ENRICHISSEMENT
 # ==================================================

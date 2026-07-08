@@ -2,139 +2,120 @@ import streamlit as st
 
 st.set_page_config(page_title="Architecture MLOps", layout="wide")
 
-st.title("🏗️ Architecture MLOps — Compagnon Immobilier")
-st.markdown("Vue d'ensemble du pipeline MLOps mis en place, de la donnée brute à la prédiction en production.")
+# CSS pour un effet Wahou (Blocs volumineux et animations)
+st.markdown("""
+<style>
+    .big-block {
+        padding: 20px;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        margin: 5px;
+        font-weight: bold;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transition: transform 0.3s;
+        font-size: 0.9rem;
+    }
+    .big-block:hover { transform: scale(1.05); }
+    .gouv { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .pipeline { background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); }
+    .serve { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
+    .monit { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .cicd { background: linear-gradient(135deg, #e91e63 0%, #d81b60 100%); }
+</style>
+""", unsafe_allow_html=True)
 
+st.title("🚀 Architecture MLOps : Système Compagnon Immobilier")
 st.markdown("---")
 
-schema_html = """
-<div style="font-family: Arial, sans-serif; padding: 10px;">
-
-  <!-- LIGNE 1 : DONNÉES -->
-  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
-    <div style="background:#e8f4fd; border:2px solid #2196F3; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">📂</div>
-      <div style="font-weight:bold; color:#1565C0;">Données DVF</div>
-      <div style="font-size:0.8rem; color:#555;">4,48M transactions<br>+ 7 sources enrichies</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#fff3e0; border:2px solid #FF9800; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">📦</div>
-      <div style="font-weight:bold; color:#E65100;">DVC + DagsHub</div>
-      <div style="font-size:0.8rem; color:#555;">Versioning données<br>& modèles</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#f3e5f5; border:2px solid #9C27B0; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">⚙️</div>
-      <div style="font-weight:bold; color:#6A1B9A;">Airflow</div>
-      <div style="font-size:0.8rem; color:#555;">Orchestration<br>du pipeline</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#e8f5e9; border:2px solid #4CAF50; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🤖</div>
-      <div style="font-weight:bold; color:#2E7D32;">XGBoost</div>
-      <div style="font-size:0.8rem; color:#555;">Entraînement<br>MAE 648 €/m²</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#fce4ec; border:2px solid #E91E63; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">📊</div>
-      <div style="font-weight:bold; color:#880E4F;">MLflow</div>
-      <div style="font-size:0.8rem; color:#555;">Tracking + Registry<br>alias "production"</div>
-    </div>
-  </div>
-
-  <!-- FLÈCHE VERS LE BAS -->
-  <div style="text-align:center; font-size:1.5rem; color:#999; margin:5px 0;">↓</div>
-
-  <!-- LIGNE 2 : DÉPLOIEMENT -->
-  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
-    <div style="background:#e3f2fd; border:2px solid #1976D2; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🐳</div>
-      <div style="font-weight:bold; color:#0D47A1;">Docker</div>
-      <div style="font-size:0.8rem; color:#555;">9 microservices<br>Docker Compose</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#fff8e1; border:2px solid #FFC107; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🔒</div>
-      <div style="font-weight:bold; color:#F57F17;">Nginx</div>
-      <div style="font-size:0.8rem; color:#555;">Reverse proxy<br>HTTPS + rate limit</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#e8f5e9; border:2px solid #43A047; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">⚡</div>
-      <div style="font-weight:bold; color:#1B5E20;">FastAPI</div>
-      <div style="font-size:0.8rem; color:#555;">API /predict<br>/health /model/info</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#e8eaf6; border:2px solid #3F51B5; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🏠</div>
-      <div style="font-weight:bold; color:#1A237E;">Streamlit</div>
-      <div style="font-size:0.8rem; color:#555;">Interface utilisateur<br>10 pages</div>
-    </div>
-  </div>
-
-  <!-- FLÈCHE VERS LE BAS -->
-  <div style="text-align:center; font-size:1.5rem; color:#999; margin:5px 0;">↓</div>
-
-  <!-- LIGNE 3 : MONITORING -->
-  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
-    <div style="background:#fbe9e7; border:2px solid #FF5722; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">📡</div>
-      <div style="font-weight:bold; color:#BF360C;">Prometheus</div>
-      <div style="font-size:0.8rem; color:#555;">Métriques API<br>scrape 15s</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#f9fbe7; border:2px solid #CDDC39; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">📈</div>
-      <div style="font-weight:bold; color:#827717;">Grafana</div>
-      <div style="font-size:0.8rem; color:#555;">Dashboards<br>temps réel</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#e0f7fa; border:2px solid #00BCD4; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🔍</div>
-      <div style="font-weight:bold; color:#006064;">Evidently</div>
-      <div style="font-size:0.8rem; color:#555;">Détection drift<br>2022 vs 2024/2025</div>
-    </div>
-    <div style="font-size:1.5rem; color:#999;">→</div>
-    <div style="background:#f3e5f5; border:2px solid #9C27B0; border-radius:10px; padding:12px 20px; text-align:center; min-width:140px;">
-      <div style="font-size:1.5rem;">🔄</div>
-      <div style="font-weight:bold; color:#4A148C;">Retraining auto</div>
-      <div style="font-size:0.8rem; color:#555;">Si drift > 30%<br>→ Airflow DAG</div>
-    </div>
-  </div>
-
-</div>
-"""
-
-st.markdown(schema_html, unsafe_allow_html=True)
-
-st.markdown("---")
-
-col1, col2, col3 = st.columns(3)
+# Visualisation des Flux en 4 colonnes
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown("### 📊 Le projet en chiffres")
-    st.markdown("""
-    - **4,48M** transactions DVF analysées
-    - **31** features par prédiction
-    - **MAE 648 €/m²** — R² = 0.80
-    - **9 microservices** Docker
-    """)
-
+    st.markdown('<div class="big-block gouv">📂 DATA & GOUVERNANCE<br><br>DVF 4.48M → DVC → Airflow → XGBoost → MLflow</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown("### 🛠️ Stack technique")
-    st.markdown("""
-    - **Versioning** : DVC + DagsHub + Git
-    - **Orchestration** : Airflow 2.9.1
-    - **ML Tracking** : MLflow 3.14
-    - **Serving** : FastAPI + Nginx HTTPS
-    """)
-
+    st.markdown('<div class="big-block serve">🐳 DEPLOYMENT<br><br>Docker Compose → Nginx → FastAPI → Streamlit</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown("### 🔄 Pipeline automatisé")
-    st.markdown("""
-    - Détection drift quotidienne
-    - Retraining automatique si drift > 30%
-    - Nouveau modèle → Registry MLflow
-    - Rechargement API sans interruption
-    """)
+    st.markdown('<div class="big-block monit">📡 MONITORING<br><br>Prometheus → Grafana → Evidently → Retrain</div>', unsafe_allow_html=True)
+with col4:
+    st.markdown('<div class="big-block cicd">🔐 CI/CD<br><br>GitHub Actions<br>Tests + Lint (Ruff)</div>', unsafe_allow_html=True)
+
+st.markdown("---")
+
+# Diagramme Interactif Mermaid Grand Format
+mermaid_code = """
+<div class="mermaid" style="width:100%; height:550px;">
+graph TD
+    subgraph Gouv [📂 1. DATA & GOUVERNANCE]
+        DVF((DVF 4.48M)) --> DVC[DVC + DagsHub]
+        DVC --> Airflow[AIRFLOW DAGs]
+        Airflow --> XGB[🤖 XGBOOST]
+        XGB --> MLR[📊 MLFLOW]
+    end
+    subgraph Deploy [🐳 2. DEPLOYMENT]
+        MLR --> DOCK[DOCKER COMPOSE]
+        DOCK --> NGINX[NGINX]
+        NGINX --> API[⚡ FASTAPI]
+        API --> ST[🏠 STREAMLIT]
+    end
+    subgraph Monitor [📡 3. MONITORING]
+        API --> PROM[PROMETHEUS]
+        PROM --> GRAF[GRAFANA]
+        API --> EVI[🔍 EVIDENTLY DRIFT]
+        EVI --"Drift > 30%"--> RETRAIN[🔄 RETRAINING AUTO]
+        RETRAIN --> Airflow
+    end
+    subgraph CI [🔐 4. CI/CD]
+        GIT[GitHub Actions] --> TEST[Tests Unitaires]
+        TEST --> LINT[Ruff Linting]
+    end
+    style Gouv fill:#e3f2fd,stroke:#1e3c72
+    style Deploy fill:#fff8e1,stroke:#f2994a
+    style Monitor fill:#e8f5e9,stroke:#11998e
+    style CI fill:#fce4ec,stroke:#e91e63
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme: 'forest'});</script>
+"""
+st.components.v1.html(mermaid_code, height=550, scrolling=True)
+
+# Détails en dessous
+st.markdown("---")
+cols = st.columns(3)
+cols[0].markdown("### 📊 Chiffres Clés\n- 4,48M transactions\n- 31 features\n- MAE 648€/m² (R² 0.80)\n- 10 microservices")
+cols[1].markdown("### 🛠️ Stack Technique\n- Versioning: DVC + DagsHub\n- Orchestration: Airflow 2.9\n- Tracking: MLflow 3.14\n- Serving: FastAPI + Nginx")
+cols[2].markdown("### 🔄 Pipeline Auto\n- Détection Drift (Quotidien)\n- Retraining auto (>30%)\n- Registry MLflow\n- Zero-downtime Reload")
+
+st.markdown("---")
+st.markdown("---")
+st.subheader("💡 Retour d'Expérience & Enseignements MLOps")
+
+# Utilisation d'un expander pour garder une page aérée
+with st.expander("🛠️ Défis rencontrés & Retour d'expérience", expanded=True):
+    col_defis, col_enseignements = st.columns([1, 1])
+    
+    with col_defis:
+        st.markdown("""
+        **📦 Reproductibilité**
+        * Absence d'artefacts ML après clonage du projet.
+        * Configuration DVC/DagsHub indispensable pour restaurer modèles et datasets.
+        
+        **🐳 Docker & Orchestration**
+        * Erreurs de build (fichiers manquants, chemins incorrects).
+        * Healthchecks mal configurés bloquant le démarrage des services.
+        
+        **🔗 Intégration des services**
+        * Harmonisation du flux Streamlit → API → Prometheus.
+        * Synchronisation Airflow → MLflow pour une traçabilité réelle.
+        """)
+        
+    with col_enseignements:
+        st.markdown("""
+        **✅ Ce que nous avons appris :**
+        * Un modèle qui fonctionne "en local" n’est pas nécessairement prêt pour la production.
+        * La reproductibilité absolue repose sur la maîtrise tripartite : **Données + Code + Environnement.**
+        * Le rôle du MLOps n'est pas seulement technique : c'est transformer un prototype isolé en un **service fiable, maintenable et évolutif.**
+        """)
+
+# Un petit message final pour clore la page avec élégance
+st.success("🎯 **Conclusion :** Nous sommes passés d'un modèle prédictif isolé à une véritable architecture industrielle capable d'être reproduite et maintenue dans le temps.")
