@@ -134,9 +134,7 @@ services:
       retries: 5
 
   airflow-init:
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.airflow
+    image: apache/airflow:2.9.1-python3.11
     container_name: immo-airflow-init
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
@@ -157,9 +155,7 @@ services:
         condition: service_healthy
 
   airflow-webserver:
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.airflow
+    image: apache/airflow:2.9.1-python3.11
     container_name: immo-airflow-webserver
     ports:
       - "8080:8080"
@@ -187,9 +183,7 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile.airflow
+    image: apache/airflow:2.9.1-python3.11
     container_name: immo-airflow-scheduler
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
