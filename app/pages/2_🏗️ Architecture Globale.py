@@ -1,121 +1,134 @@
 import streamlit as st
+import time
 
 st.set_page_config(page_title="Architecture MLOps", layout="wide")
 
-# CSS pour un effet Wahou (Blocs volumineux et animations)
+# --- CSS PREMIUM ---
 st.markdown("""
 <style>
-    .big-block {
-        padding: 20px;
-        border-radius: 15px;
-        color: white;
-        text-align: center;
-        margin: 5px;
-        font-weight: bold;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        transition: transform 0.3s;
-        font-size: 0.9rem;
-    }
-    .big-block:hover { transform: scale(1.05); }
-    .gouv { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
-    .pipeline { background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%); }
-    .serve { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
-    .monit { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-    .cicd { background: linear-gradient(135deg, #e91e63 0%, #d81b60 100%); }
+    .pillar-card { padding: 20px; border-radius: 15px; text-align: center; color: white; transition: 0.3s; }
+    .pillar-card:hover { transform: scale(1.05); }
+    .timeline-item { border-left: 3px solid #6c757d; padding-left: 20px; margin-bottom: 15px; position: relative; }
+    .timeline-dot { width: 12px; height: 12px; background: #6c757d; border-radius: 50%; position: absolute; left: -8px; top: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🚀 Architecture MLOps : Système Compagnon Immobilier")
+# 1. Header Premium
+st.title("🏗️ Architecture MLOps : Industrialiser le cycle de vie d’un modèle")
+st.info("De la donnée versionnée au service intelligent supervisé")
+
+# 2. Parcours Utilisateur + Flux de Production (Côte à côte)
+col_top1, col_top2 = st.columns([1, 1])
+
+with col_top1:
+    st.subheader("🔄 Parcours utilisateur")
+    st.markdown("""
+    ```mermaid
+    graph TD
+    A[Utilisateur] --> B[Streamlit]
+    B --> C[Nginx]
+    C --> D[FastAPI]
+    D --> E[MLflow Registry]
+    E --> F[XGBoost]
+    F --> G[Résultat]
+    D -.-> H[Prometheus]
+    H --> I[Grafana]
+    ```
+    """)
+
+with col_top2:
+    st.subheader("⚡ Flux de production")
+    placeholder = st.empty()
+    for text in ["👤 Utilisateur", "📱 Streamlit", "⚡ API FastAPI", "🤖 Modèle XGBoost", "🏠 Estimation !"]:
+        placeholder.markdown(f"### ➡️ {text}")
+        time.sleep(.3)
+
 st.markdown("---")
 
-# Visualisation des Flux en 4 colonnes
-col1, col2, col3, col4 = st.columns(4)
+# 3. Les 4 Piliers
+st.subheader("Les 4 Piliers de l'Architecture")
+cols = st.columns(4)
+piliers = [
+    ("📂 Gouvernance", "#1e3c72", "DVC • DagsHub • MLflow"),
+    ("⚙️ Automatisation", "#7b1fa2", "Pipelines Airflow"),
+    ("🚀 Déploiement", "#f2994a", "Docker • FastAPI • Nginx"),
+    ("📈 Monitoring", "#11998e", "Prometheus • Grafana • Evidently")
+]
+
+for i, (titre, color, desc) in enumerate(piliers):
+    with cols[i]:
+        st.markdown(f'<div class="pillar-card" style="background-color: {color};"><h3>{titre}</h3><p>{desc}</p></div>', unsafe_allow_html=True)
+
+st.markdown("---")
+
+# 4. Cycle de vie complet (Largeur totale)
+st.subheader("🔁 Cycle de vie & Évolution complète")
+st.markdown("""
+    ```mermaid
+    graph LR
+        subgraph CICD [🔐 Couche Transversale CI/CD : Qualité & Tests]
+            Actions[GitHub Actions] --> Test[Tests & Linting]
+        end
+
+        A[Data: DVF/INSEE] --> B[Pipeline Airflow]
+        B --> C[Entraînement]
+        C --> D[MLflow Registry]
+        D --> E[FastAPI/Streamlit]
+        E -.-> F[Evidently Drift]
+        F --"Drift > 30%"--> B
+        
+        CICD -.-> B
+        CICD -.-> C
+        CICD -.-> E
+        
+        style CICD fill:#fce4ec,stroke:#e91e63,stroke-dasharray: 5 5
+    ```
+    """)
+
+st.markdown("---")
+
+# 5. KPI Professionnels
+st.subheader("Modèle & Infrastructure en chiffres")
+kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+kpi1.metric("Transactions", "4,48 M")
+kpi2.metric("Features", "31")
+kpi3.metric("R² Score", "0.80")
+kpi4.metric("MAE", "648 €/m²")
+kpi5.metric("Conteneurs Docker", "10")
+
+st.markdown("---")
+
+# 6. REX : Chemin vers la production
+st.subheader("🛠️ Retour d'expérience : Le chemin vers la production")
+col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.markdown('<div class="big-block gouv">📂 DATA & GOUVERNANCE<br><br>DVF 4.48M → DVC → Airflow → XGBoost → MLflow</div>', unsafe_allow_html=True)
+    steps = [
+        ("Git Clone", "Code récupéré"),
+        ("DVC Pull", "Données & Artefacts restaurés"),
+        ("Docker Build", "Conteneurs isolés"),
+        ("Healthchecks", "Services synchronisés"),
+        ("Pipeline OK", "Entraînement automatisé"),
+        ("Application OK", "Service opérationnel")
+    ]
+    for step, desc in steps:
+        st.markdown(f'<div class="timeline-item"><div class="timeline-dot"></div><strong>{step}</strong><br><small>{desc}</small></div>', unsafe_allow_html=True)
+
 with col2:
-    st.markdown('<div class="big-block serve">🐳 DEPLOYMENT<br><br>Docker Compose → Nginx → FastAPI → Streamlit</div>', unsafe_allow_html=True)
-with col3:
-    st.markdown('<div class="big-block monit">📡 MONITORING<br><br>Prometheus → Grafana → Evidently → Retrain</div>', unsafe_allow_html=True)
-with col4:
-    st.markdown('<div class="big-block cicd">🔐 CI/CD<br><br>GitHub Actions<br>Tests + Lint (Ruff)</div>', unsafe_allow_html=True)
+    st.info("### 🎓 Ce que nous avons appris")
+    st.markdown("""
+    * **La rigueur est la clé :** Un modèle performant en local n'est rien sans un déploiement robuste.
+    * **Reproductibilité absolue :** DVC et DagsHub sont nos seuls garants contre l'obsolescence.
+    * **Industrialisation :** Automatiser les tests (CI/CD) permet de garantir la fiabilité lors des mises à jour.
+    * **Culture MLOps :** Le monitoring n'est pas optionnel, c'est ce qui transforme le code en un **produit**.
+    """)
 
-st.markdown("---")
+# 7. Conclusion
+st.success("""
+### 🎯 À retenir
+Notre objectif n'était pas seulement de construire un modèle performant, 
+mais une architecture capable de le faire vivre dans le temps.
+Le MLOps transforme un prototype Data Science en un véritable service industriel.
+""")
 
-# Diagramme Interactif Mermaid Grand Format
-mermaid_code = """
-<div class="mermaid" style="width:100%; height:550px;">
-graph TD
-    subgraph Gouv [📂 1. DATA & GOUVERNANCE]
-        DVF((DVF 4.48M)) --> DVC[DVC + DagsHub]
-        DVC --> Airflow[AIRFLOW DAGs]
-        Airflow --> XGB[🤖 XGBOOST]
-        XGB --> MLR[📊 MLFLOW]
-    end
-    subgraph Deploy [🐳 2. DEPLOYMENT]
-        MLR --> DOCK[DOCKER COMPOSE]
-        DOCK --> NGINX[NGINX]
-        NGINX --> API[⚡ FASTAPI]
-        API --> ST[🏠 STREAMLIT]
-    end
-    subgraph Monitor [📡 3. MONITORING]
-        API --> PROM[PROMETHEUS]
-        PROM --> GRAF[GRAFANA]
-        API --> EVI[🔍 EVIDENTLY DRIFT]
-        EVI --"Drift > 30%"--> RETRAIN[🔄 RETRAINING AUTO]
-        RETRAIN --> Airflow
-    end
-    subgraph CI [🔐 4. CI/CD]
-        GIT[GitHub Actions] --> TEST[Tests Unitaires]
-        TEST --> LINT[Ruff Linting]
-    end
-    style Gouv fill:#e3f2fd,stroke:#1e3c72
-    style Deploy fill:#fff8e1,stroke:#f2994a
-    style Monitor fill:#e8f5e9,stroke:#11998e
-    style CI fill:#fce4ec,stroke:#e91e63
-</div>
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true, theme: 'forest'});</script>
-"""
-st.components.v1.html(mermaid_code, height=550, scrolling=True)
-
-# Détails en dessous
-st.markdown("---")
-cols = st.columns(3)
-cols[0].markdown("### 📊 Chiffres Clés\n- 4,48M transactions\n- 31 features\n- MAE 648€/m² (R² 0.80)\n- 10 microservices")
-cols[1].markdown("### 🛠️ Stack Technique\n- Versioning: DVC + DagsHub\n- Orchestration: Airflow 2.9\n- Tracking: MLflow 3.14\n- Serving: FastAPI + Nginx")
-cols[2].markdown("### 🔄 Pipeline Auto\n- Détection Drift (Quotidien)\n- Retraining auto (>30%)\n- Registry MLflow\n- Zero-downtime Reload")
-
-st.markdown("---")
-st.markdown("---")
-st.subheader("💡 Retour d'Expérience & Enseignements MLOps")
-
-# Utilisation d'un expander pour garder une page aérée
-with st.expander("🛠️ Défis rencontrés & Retour d'expérience", expanded=True):
-    col_defis, col_enseignements = st.columns([1, 1])
-    
-    with col_defis:
-        st.markdown("""
-        **📦 Reproductibilité**
-        * Absence d'artefacts ML après clonage du projet.
-        * Configuration DVC/DagsHub indispensable pour restaurer modèles et datasets.
-        
-        **🐳 Docker & Orchestration**
-        * Erreurs de build (fichiers manquants, chemins incorrects).
-        * Healthchecks mal configurés bloquant le démarrage des services.
-        
-        **🔗 Intégration des services**
-        * Harmonisation du flux Streamlit → API → Prometheus.
-        * Synchronisation Airflow → MLflow pour une traçabilité réelle.
-        """)
-        
-    with col_enseignements:
-        st.markdown("""
-        **✅ Ce que nous avons appris :**
-        * Un modèle qui fonctionne "en local" n’est pas nécessairement prêt pour la production.
-        * La reproductibilité absolue repose sur la maîtrise tripartite : **Données + Code + Environnement.**
-        * Le rôle du MLOps n'est pas seulement technique : c'est transformer un prototype isolé en un **service fiable, maintenable et évolutif.**
-        """)
-
-# Un petit message final pour clore la page avec élégance
-st.success("🎯 **Conclusion :** Nous sommes passés d'un modèle prédictif isolé à une véritable architecture industrielle capable d'être reproduite et maintenue dans le temps.")
+st.warning("Détaillons maintenant les composants techniques et l'infrastructure sous-jacente.")

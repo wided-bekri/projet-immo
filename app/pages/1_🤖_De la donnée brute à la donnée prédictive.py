@@ -106,10 +106,10 @@ with tab1:
     with col_right:
         st.subheader("📈 Parcours de la donnée")
         fig_funnel = go.Figure(go.Funnel(
-            y=["Données brutes (20M)", "Ciblage Résidentiel", "Nettoyage Expert", "Valeurs Aberrantes", "Dataset ML-Ready"],
-            x=[20000000, 14000000, 10000000, 8500000, 7500000],
+            y=["Données DVF Brutes(20M)", "Sélection Résidentiel", "Filtres Métier / Outliers", "Dataset Consolidé"],
+            x=[20100000, 12500000, 5200000, 4480000],
             textinfo="value+percent previous",
-            marker=dict(color=["#111e2e", "#1f4068", "#2a5a8a", "#17b978", "#00eaaf"])
+            marker=dict(color=[ "#1f4068", "#2a5a8a", "#17b978", "#00eaaf"])
         ))
         fig_funnel.update_layout(height=300, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_funnel, use_container_width=True)
