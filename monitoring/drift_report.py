@@ -65,7 +65,7 @@ def run_data_drift_report(reference: pd.DataFrame, current: pd.DataFrame, label:
         result_dict = result.dict()
         drift_info = result_dict["metrics"][0]["value"]
         share_drifted = drift_info.get("share_of_drifted_columns", 0.0)
-        drift_detected = drift_info.get("dataset_drift", share_drifted > 0.5)
+        drift_detected = drift_info.get("dataset_drift", share_drifted > 0.3)
         print(f"[drift] 2022 → {label.split('_')[-1]} : drift={drift_detected} ({share_drifted:.1%} features)")
     except Exception:
         print(f"[drift] Rapport {label} généré (extraction métriques échouée).")

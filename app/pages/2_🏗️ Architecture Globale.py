@@ -66,7 +66,7 @@ st.subheader("🔁 Cycle de vie & Évolution complète")
 st.markdown("""
     ```mermaid
     graph LR
-        subgraph CICD [🔐 Couche Transversale CI/CD : Qualité & Tests]
+        subgraph CI [🔐 Couche Transversale CI : Qualité & Tests]
             Actions[GitHub Actions] --> Test[Tests & Linting]
         end
 
@@ -77,11 +77,11 @@ st.markdown("""
         E -.-> F[Evidently Drift]
         F --"Drift > 30%"--> B
         
-        CICD -.-> B
-        CICD -.-> C
-        CICD -.-> E
+        CI -.-> B
+        CI -.-> C
+        CI -.-> E
         
-        style CICD fill:#fce4ec,stroke:#e91e63,stroke-dasharray: 5 5
+        style CI fill:#fce4ec,stroke:#e91e63,stroke-dasharray: 5 5
     ```
     """)
 
@@ -119,7 +119,7 @@ with col2:
     st.markdown("""
     * **La rigueur est la clé :** Un modèle performant en local n'est rien sans un déploiement robuste.
     * **Reproductibilité absolue :** DVC et DagsHub sont nos seuls garants contre l'obsolescence.
-    * **Industrialisation :** Automatiser les tests (CI/CD) permet de garantir la fiabilité lors des mises à jour.
+    * **Industrialisation :** Automatiser les tests (CI) permet de garantir la fiabilité lors des mises à jour.
     * **Culture MLOps :** Le monitoring n'est pas optionnel, c'est ce qui transforme le code en un **produit**.
     """)
 

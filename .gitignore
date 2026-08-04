@@ -42,6 +42,8 @@ historique_retrouve/
 generate_doc*.py
 gen_mockups.py
 *.png
+# Exception : images de démonstration du README
+!app/images/*.png
 *.odt
 *.docx
 *.txt

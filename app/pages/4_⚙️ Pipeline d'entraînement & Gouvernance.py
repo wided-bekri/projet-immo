@@ -1,4 +1,6 @@
 import streamlit as st
+from PIL import Image
+import os
 
 st.set_page_config(page_title="Pipeline & Gouvernance", layout="wide")
 
@@ -43,12 +45,18 @@ On a choisi **XGBoost** parce que c'est un algorithme qui gère bien les donnée
 
 XGBoost construit des centaines d'arbres de décision les uns après les autres.
 Chaque arbre corrige les erreurs du précédent.
+
+On a fait le choix de garder **un seul modèle XGBoost** entraîné sur l'ensemble des données françaises.
+Un modèle unique, simple et robuste — capable de gérer toute la diversité du marché immobilier français.
 """)
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 col1.metric("Transactions analysées", "4,48M")
 col2.metric("MAE (erreur moyenne)", "648 €/m²")
 col3.metric("R² (précision globale)", "0.80")
+col4.metric("Arbres XGBoost", "800")
+
+st.markdown("**Hyperparamètres du modèle final :** `n_estimators=800` · `max_depth=8` · `learning_rate=0.05`")
 
 st.info("💡 **R² = 0.80** signifie que le modèle explique 80% des variations de prix. C'est correct pour un marché aussi complexe que l'immobilier français.")
 
@@ -76,7 +84,38 @@ with col3:
 
 st.markdown("---")
 
+# Intégration des images MLflow
+st.subheader("Visualisation de l'historique des Runs")
+
+try:
+    st.image("app/images/mlflow_runs.png", caption="Liste de tous les runs MLflow — chaque ligne = un entraînement", use_container_width=True)
+except FileNotFoundError:
+    st.warning("mlflow_runs.png introuvable.")
+
+try:
+    st.image("app/images/mlflow_run_detail.png", caption="Détail d'un run : paramètres et métriques enregistrés", use_container_width=True)
+except FileNotFoundError:
+    st.warning("mlflow_run_detail.png introuvable.")
+
+try:
+    st.image("app/images/mlflow_version5.png", caption="Modèle v5 enregistré dans le Registry avec alias 'production'", use_container_width=True)
+except FileNotFoundError:
+    st.warning("mlflow_version5.png introuvable.")
+
+# Lien d'accès direct
+MLFLOW_URL = os.environ.get("MLFLOW_URL", "http://localhost:5000")
+st.markdown(f"""
+**Accès MLflow :** [Cliquez ici pour accéder au Dashboard MLflow]({MLFLOW_URL})  
+*Enregistrez vos expériences pour garantir la reproductibilité totale.*
+""")
+st.markdown("---")
+
 st.header("4. Le Model Registry et l'alias 'production'")
+
+try:
+    st.image("app/images/mlflow_registry.png", caption="MLflow Model Registry — compagnon-immobilier avec alias @production", use_container_width=True)
+except FileNotFoundError:
+    st.warning("mlflow_registry.png introuvable.")
 
 st.markdown("""
 Une fois qu'un modèle est validé, on lui donne l'alias **"production"** dans MLflow.

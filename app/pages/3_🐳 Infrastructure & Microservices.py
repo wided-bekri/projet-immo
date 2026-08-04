@@ -1,4 +1,6 @@
 import streamlit as st
+from PIL import Image
+import os
 
 st.set_page_config(page_title="Infrastructure", layout="wide")
 
@@ -11,6 +13,14 @@ sur la machine de Carine, et demain sur un serveur ?
 **La solution :** Docker. On a mis chaque outil dans une "boîte" isolée (un conteneur),
 et Docker Compose démarre toutes les boîtes ensemble avec une seule commande.
 """)
+
+st.markdown("---")
+
+st.subheader("🟢 Nos conteneurs en production")
+try:
+    st.image("app/images/docker_containers.png", caption="Tous les services tournent en simultané", use_container_width=True)
+except FileNotFoundError:
+    st.warning("Image docker_containers.png non trouvée.")
 
 st.markdown("---")
 
@@ -79,11 +89,56 @@ Airflow → orchestre les tâches automatiques (drift, retraining)
 PostgreSQL → stocke les données Airflow
 """, language="")
 
-st.success("✅ Une seule commande pour tout démarrer : **docker compose up -d**")
+st.markdown("---")
 
-st.info("""
-💡 **Pourquoi c'est utile ?**
-Si le service FastAPI plante, Streamlit continue de fonctionner.
-Si Prometheus plante, l'API continue de faire des prédictions.
-Chaque service est indépendant → moins de risque de tout casser d'un coup.
+st.header("🛠️ Orchestration avec Airflow")
+
+st.markdown("""
+Airflow est notre tour de contrôle. Il assure que chaque tâche s'exécute dans le bon ordre et au bon moment.
+On a créé **2 DAGs** (pipelines automatiques) :
+- **compagnon_immo_pipeline** : retraining hebdomadaire (collect → preprocess → train → reload)
+- **drift_monitoring_retraining** : vérification quotidienne à 6h, retraining automatique si drift > 30%
 """)
+
+try:
+    st.image("app/images/airflow_dags.png", caption="Les 2 pipelines automatiques dans Airflow", use_container_width=True)
+except FileNotFoundError:
+    st.warning("L'image airflow_dags.png est introuvable.")
+
+AIRFLOW_URL = os.environ.get("AIRFLOW_URL", "http://localhost:8080")
+st.markdown(f"**Accès Airflow en direct :** [http://localhost:8080]({AIRFLOW_URL})")
+
+st.markdown("---")
+
+st.header("⚙️ CI — Intégration Continue avec GitHub Actions")
+
+st.markdown("""
+À chaque fois qu'on pousse du code sur GitHub, un pipeline **CI (Continuous Integration)** se déclenche automatiquement.
+
+**Ce qu'il fait :**
+1. **Lint** avec Ruff → vérifie la qualité du code
+2. **Tests unitaires** avec Pytest → vérifie que l'API répond correctement
+
+Si un test échoue, le code n'est pas intégré. Ça garantit qu'on ne casse jamais ce qui marchait.
+""")
+
+try:
+    st.image("app/images/github_actions.png", caption="42 runs CI — tous validés ✅", use_container_width=True)
+except FileNotFoundError:
+    st.warning("Image github_actions.png non trouvée.")
+
+st.markdown("---")
+
+st.header("🚀 Et demain ? Kubernetes")
+
+st.markdown("""
+Notre projet tourne aujourd'hui sur **une seule machine** avec Docker Compose.
+
+Si le trafic augmente (des milliers d'utilisateurs), Docker Compose ne suffit plus.
+La prochaine étape serait **Kubernetes** : il permet de faire tourner plusieurs copies de chaque service
+et de les équilibrer automatiquement — c'est ce qu'on appelle le **scaling horizontal**.
+
+Nous avons déjà préparé les fichiers de configuration Kubernetes (`k8s/`) dans notre repo.
+""")
+
+st.success("✅ Une seule commande pour tout démarrer : **docker compose up -d**")

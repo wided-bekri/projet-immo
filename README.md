@@ -65,7 +65,7 @@ docker compose up -d
 | Service | URL | Identifiants |
 |---|---|---|
 | Application Streamlit | http://localhost:8501 | — |
-| API FastAPI (Swagger) | http://localhost:8000/docs | API Key requise |
+| API FastAPI (Swagger) | https://localhost/docs | API Key requise |
 | MLflow | http://localhost:5000 | — |
 | Airflow | http://localhost:8080 | admin / admin |
 | Grafana | http://localhost:3000 | admin / admin |
@@ -130,9 +130,10 @@ prix_final = résiduel_prédit + commune_prix_m2
 ### Exemple d'appel
 
 ```bash
-curl -X POST http://localhost:8000/predict \
+curl -X POST https://localhost/predict \
   -H "X-Api-Key: votre_cle" \
   -H "Content-Type: application/json" \
+  -k \
   -d '{
     "surface_reelle_bati": 70,
     "nombre_pieces_principales": 3,
