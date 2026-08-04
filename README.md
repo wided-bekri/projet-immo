@@ -314,7 +314,7 @@ projet-immo/
 ## 👩‍💻 Auteur
 
 **Wided El Bekri** — Machine Learning Engineer Junior  
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-wided--bekri-0A66C2?logo=linkedin&logoColor=white)](https://linkedin.com/in/wided-bekri)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-wided--eb-0A66C2?logo=linkedin&logoColor=white)](https://linkedin.com/in/wided-eb)
 [![GitHub](https://img.shields.io/badge/GitHub-wided--bekri-181717?logo=github&logoColor=white)](https://github.com/wided-bekri)
 
 Projet de fin de formation — Machine Learning Engineer | Liora (ex-DataScientest) — 735h
