@@ -318,3 +318,5 @@ projet-immo/
 [![GitHub](https://img.shields.io/badge/GitHub-wided--bekri-181717?logo=github&logoColor=white)](https://github.com/wided-bekri)
 
 Projet de fin de formation — Machine Learning Engineer | Liora (ex-DataScientest) — 735h
+
+> Partie Data Science : [wided-bekri/projet-immo-ds](https://github.com/wided-bekri/projet-immo-ds) — modélisation DVF, benchmark algorithmes, architecture résiduelle 6 sous-modèles
